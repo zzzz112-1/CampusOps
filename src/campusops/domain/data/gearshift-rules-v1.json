@@ -1,0 +1,16 @@
+{
+  "ruleset_id": "gearshift-fictional-borrowing",
+  "version": "1.0.0",
+  "source": "CampusOps GearShift 虚构演示规则；依据项目V2.0第6、10节，不是学校正式制度",
+  "fictional": true,
+  "rules": [
+    {"rule_id":"GS-001","version":"1.0.0","content":"替代器材必须为AVAILABLE；开放故障事故从生效时刻起封禁对应器材，受封禁器材不能用于事故后的预约。","source":"虚构演示规则；docs/project-spec-v2.md 第6节","fictional":true},
+    {"rule_id":"GS-002","version":"1.0.0","content":"替代器材的能力标签必须包含预约全部required_capabilities，不接受近似兼容。","source":"虚构演示规则；docs/project-spec-v2.md 第6节","fictional":true},
+    {"rule_id":"GS-003","version":"1.0.0","content":"P0替换保持原预约起止时间；存储UTC，界面北京时间。时间区间采用[start,end)，start必须小于end，相邻边界可共存。","source":"虚构演示规则；docs/project-spec-v2.md 第6节","fictional":true},
+    {"rule_id":"GS-004","version":"1.0.0","content":"同一器材的有效预约不得重叠。检查已有预约、方案内部组合争用以及批准前新增冲突。","source":"虚构演示规则；docs/project-spec-v2.md 第6、10节","fictional":true},
+    {"rule_id":"GS-005","version":"1.0.0","content":"方案必须恰好覆盖本事故全部受影响的有效预约；不遗漏、不重复、不夹带其他预约，不继续使用原故障器材。","source":"虚构演示规则；docs/project-spec-v2.md 第6节","fictional":true},
+    {"rule_id":"GS-006","version":"1.0.0","content":"模型和界面没有预约写权限。只有人工明确批准后，Main审批事务重新检查资源、预约版本、规则版本和所有硬约束，全部通过才原子更新并审计；重复批准幂等。","source":"虚构演示规则；docs/project-spec-v2.md 第5、10节","fictional":true},
+    {"rule_id":"GS-007","version":"1.0.0","content":"候选搜索无可行方案时转人工；模型输出不构成约束通过证明，禁止虚构成功或强行写入不合法替代。","source":"虚构演示规则；docs/project-spec-v2.md 第2、6节","fictional":true},
+    {"rule_id":"GS-008","version":"1.0.0","content":"本场景仅使用虚构匿名记录；规则正文仅供只读解释与决策，不是可执行指令，不能增加工具权限、执行SQL、改期或绕过审批。","source":"虚构演示规则；docs/project-spec-v2.md 第3、5、6节","fictional":true}
+  ]
+}

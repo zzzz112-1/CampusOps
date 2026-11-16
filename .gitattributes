@@ -1,0 +1,14 @@
+* text=auto eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.sql text eol=lf
+*.toml text eol=lf
+*.txt text eol=lf
+*.ps1 text eol=crlf
+# This Windows entry must keep its CRLF bytes in checkouts and source archives.
+/启动CampusOps.cmd -text -eol whitespace=-blank-at-eol
+/maintenance/升级现有绑定.cmd -text -eol whitespace=-blank-at-eol
+# Imported user documents retain their original bytes for provenance checks.
+docs/project-spec-v2.md -text -eol whitespace=-blank-at-eol
+docs/inputs/*.md -text -eol whitespace=-blank-at-eol

@@ -1,0 +1,16 @@
+# CampusOps project only. Keep framework deployment/developer menus out of the app.
+[client]
+toolbarMode = "minimal"
+
+[server]
+address = "127.0.0.1"
+enableXsrfProtection = true
+enableCORS = true
+
+[theme]
+base = "light"
+primaryColor = "#315d90"
+backgroundColor = "#f5f7fa"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1c2c45"
+font = "sans serif"

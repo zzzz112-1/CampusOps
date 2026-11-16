@@ -1,0 +1,11 @@
+{
+  "source_url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.12.16+20261026-x86_64-pc-windows-msvc-install_only.tar.gz",
+  "release": "20261026",
+  "python_version": "3.12.16",
+  "architecture": "x86_64-pc-windows-msvc",
+  "sha256": "590dfcbe3a34c07301e6332e13e2188b98655cd072b08afa45a7998dc4c22bc5",
+  "publisher_digest_source": "https://github.com/astral-sh/python-build-standalone/releases/expanded_assets/20261026",
+  "installation": "Direct verified extraction in this D-drive project; no registry, global PATH, or global Python installation",
+  "license_scope": "Retain the distribution LICENSE.txt and vendored package license files; build tooling and Python dependency licenses have distinct scopes",
+  "native_component_overlay": "native-components-rc14.json extends the preserved rc12 manifest: libffi-8.dll, sqlite3.dll, _sqlite3.pyd, _uuid.pyd use exact-hash original-publisher signed builds; CPython interpreter remains 3.12.16 and locked Python dependencies are unchanged"
+}

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools==84.2.1", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "campusops"
+version = "0.2.0rc15"
+description = "GearShift campus equipment incident rescheduling foundation"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pydantic==2.14.3",
+    "langgraph==1.2.20",
+    "streamlit==1.66.1",
+    "openai==2.54.0",
+    "pyotp==2.9.0",
+    "qrcode==8.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.2.0"]
+
+[project.scripts]
+campusops = "campusops.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"campusops.storage" = ["migrations/*.sql"]
+"campusops.domain" = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+cache_dir = ".cache/pytest"

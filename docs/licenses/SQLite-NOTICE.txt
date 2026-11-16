@@ -1,0 +1,9 @@
+SQLite is public domain. Its deliverable source and compiled library may be
+used, copied, modified and distributed for commercial or non-commercial use.
+
+The SQLite authors' copyright and public-domain explanation is published at:
+https://sqlite.org/copyright.html
+
+CampusOps RC12 retains SQLite version 3.53.1. The replacement DLL is an
+unchanged publisher-signed build; see docs/inputs/native-components-rc12.json
+for its exact SHA256, origin and signer. No endorsement of CampusOps is implied.

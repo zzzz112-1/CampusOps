@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "python_version": "3.12.16",
+  "sqlite_version": "3.53.1",
+  "base_runtime_provenance": "python-runtime-source.json",
+  "origin": "OpenAI CodexPrimaryRuntime v26-1112-611-0, bundled open-source libffi and SQLite DLLs only",
+  "source_bundle_version": "26.1112.11011",
+  "signer": "OpenAI OpCo, LLC",
+  "signer_thumbprint": "B7593E9F99702D920B34FD0B713803148FDB8B2D",
+  "issuer": "Microsoft ID Verified CS AOC CA 04",
+  "components": [
+    {
+      "path": "DLLs/libffi-8.dll",
+      "sha256": "1a365c63f47ac55a46ca26a2f9729d53a7638a5269b6f4a626a275f5a35c81c8",
+      "replaced_sha256": "4725c5067272cff1efb7dc9f25d43520a76473c9eeaff59ad3c9b1a1a3f17d95",
+      "license": "MIT",
+      "license_file": "docs/licenses/libffi-LICENSE.txt",
+      "upstream": "https://github.com/libffi/libffi"
+    },
+    {
+      "path": "DLLs/sqlite3.dll",
+      "sha256": "f528ac9f9bc1c95169df8ae04d5815e17ab85cab986c79f304c639fc88f287ee",
+      "replaced_sha256": "fc119cc8bf851b5e0e53532a564547807fc39db23e87c66fdd9246b51ea33d97",
+      "license": "Public Domain",
+      "license_file": "docs/licenses/SQLite-NOTICE.txt",
+      "upstream": "https://sqlite.org/copyright.html"
+    }
+  ],
+  "unchanged": ["python.exe", "python312.dll", "DLLs/_ctypes.pyd", "DLLs/_sqlite3.pyd", "Python standard library", "locked Python dependencies"],
+  "constraints": [
+    "Original publisher signatures are preserved; CampusOps does not sign as OpenAI or claim endorsement",
+    "No certificate import, trust-store change, application-control exception or policy change",
+    "Only the two named DLLs are admitted after exact hash and Windows Authenticode validation",
+    "No promise that every binary in the whole application is signed or accepted by every computer policy"
+  ]
+}

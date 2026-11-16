@@ -1,0 +1,447 @@
+{
+  "dataset_id": "campusops-fictional-demo-v1",
+  "fictional": true,
+  "borrower_aliases": [
+    "borrower-01",
+    "borrower-02",
+    "borrower-03",
+    "borrower-04",
+    "borrower-05",
+    "borrower-06"
+  ],
+  "equipment": [
+    {
+      "id": "cam-01",
+      "name": "演示相机 A",
+      "category": "camera",
+      "capabilities": [
+        "photo",
+        "video"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "cam-02",
+      "name": "演示相机 B",
+      "category": "camera",
+      "capabilities": [
+        "photo",
+        "video"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "cam-03",
+      "name": "演示相机 C",
+      "category": "camera",
+      "capabilities": [
+        "photo",
+        "video",
+        "4k"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "tripod-01",
+      "name": "演示三脚架 A",
+      "category": "tripod",
+      "capabilities": [
+        "camera_mount"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "tripod-02",
+      "name": "演示三脚架 B",
+      "category": "tripod",
+      "capabilities": [
+        "camera_mount"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "mic-01",
+      "name": "演示麦克风 A",
+      "category": "microphone",
+      "capabilities": [
+        "audio"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "mic-02",
+      "name": "演示麦克风 B",
+      "category": "microphone",
+      "capabilities": [
+        "audio"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "light-01",
+      "name": "演示补光灯 A",
+      "category": "light",
+      "capabilities": [
+        "lighting"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "light-02",
+      "name": "演示补光灯 B",
+      "category": "light",
+      "capabilities": [
+        "lighting"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "projector-01",
+      "name": "演示投影仪 A",
+      "category": "projector",
+      "capabilities": [
+        "presentation"
+      ],
+      "status": "AVAILABLE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    }
+  ],
+  "reservations": [
+    {
+      "id": "booking-01",
+      "equipment_id": "cam-01",
+      "borrower_alias": "borrower-01",
+      "starts_at": "2026-11-10T01:00:00+00:00",
+      "ends_at": "2026-11-10T02:00:00+00:00",
+      "required_capabilities": [
+        "photo"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-02",
+      "equipment_id": "cam-01",
+      "borrower_alias": "borrower-02",
+      "starts_at": "2026-11-11T01:00:00+00:00",
+      "ends_at": "2026-11-11T02:00:00+00:00",
+      "required_capabilities": [
+        "photo"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-03",
+      "equipment_id": "cam-02",
+      "borrower_alias": "borrower-03",
+      "starts_at": "2026-11-10T03:00:00+00:00",
+      "ends_at": "2026-11-10T04:00:00+00:00",
+      "required_capabilities": [
+        "photo"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-04",
+      "equipment_id": "cam-02",
+      "borrower_alias": "borrower-04",
+      "starts_at": "2026-11-11T03:00:00+00:00",
+      "ends_at": "2026-11-11T04:00:00+00:00",
+      "required_capabilities": [
+        "photo"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-05",
+      "equipment_id": "cam-03",
+      "borrower_alias": "borrower-05",
+      "starts_at": "2026-11-10T05:00:00+00:00",
+      "ends_at": "2026-11-10T06:00:00+00:00",
+      "required_capabilities": [
+        "photo"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-06",
+      "equipment_id": "cam-03",
+      "borrower_alias": "borrower-06",
+      "starts_at": "2026-11-11T05:00:00+00:00",
+      "ends_at": "2026-11-11T06:00:00+00:00",
+      "required_capabilities": [
+        "photo"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-07",
+      "equipment_id": "tripod-01",
+      "borrower_alias": "borrower-01",
+      "starts_at": "2026-11-10T07:00:00+00:00",
+      "ends_at": "2026-11-10T08:00:00+00:00",
+      "required_capabilities": [
+        "camera_mount"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-08",
+      "equipment_id": "tripod-01",
+      "borrower_alias": "borrower-02",
+      "starts_at": "2026-11-11T07:00:00+00:00",
+      "ends_at": "2026-11-11T08:00:00+00:00",
+      "required_capabilities": [
+        "camera_mount"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-09",
+      "equipment_id": "tripod-02",
+      "borrower_alias": "borrower-03",
+      "starts_at": "2026-11-10T01:00:00+00:00",
+      "ends_at": "2026-11-10T02:00:00+00:00",
+      "required_capabilities": [
+        "camera_mount"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-10",
+      "equipment_id": "tripod-02",
+      "borrower_alias": "borrower-04",
+      "starts_at": "2026-11-11T01:00:00+00:00",
+      "ends_at": "2026-11-11T02:00:00+00:00",
+      "required_capabilities": [
+        "camera_mount"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-11",
+      "equipment_id": "mic-01",
+      "borrower_alias": "borrower-05",
+      "starts_at": "2026-11-10T03:00:00+00:00",
+      "ends_at": "2026-11-10T04:00:00+00:00",
+      "required_capabilities": [
+        "audio"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-12",
+      "equipment_id": "mic-01",
+      "borrower_alias": "borrower-06",
+      "starts_at": "2026-11-11T03:00:00+00:00",
+      "ends_at": "2026-11-11T04:00:00+00:00",
+      "required_capabilities": [
+        "audio"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-13",
+      "equipment_id": "mic-02",
+      "borrower_alias": "borrower-01",
+      "starts_at": "2026-11-10T05:00:00+00:00",
+      "ends_at": "2026-11-10T06:00:00+00:00",
+      "required_capabilities": [
+        "audio"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-14",
+      "equipment_id": "mic-02",
+      "borrower_alias": "borrower-02",
+      "starts_at": "2026-11-11T05:00:00+00:00",
+      "ends_at": "2026-11-11T06:00:00+00:00",
+      "required_capabilities": [
+        "audio"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-15",
+      "equipment_id": "light-01",
+      "borrower_alias": "borrower-03",
+      "starts_at": "2026-11-10T07:00:00+00:00",
+      "ends_at": "2026-11-10T08:00:00+00:00",
+      "required_capabilities": [
+        "lighting"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-16",
+      "equipment_id": "light-01",
+      "borrower_alias": "borrower-04",
+      "starts_at": "2026-11-11T07:00:00+00:00",
+      "ends_at": "2026-11-11T08:00:00+00:00",
+      "required_capabilities": [
+        "lighting"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-17",
+      "equipment_id": "light-02",
+      "borrower_alias": "borrower-05",
+      "starts_at": "2026-11-10T01:00:00+00:00",
+      "ends_at": "2026-11-10T02:00:00+00:00",
+      "required_capabilities": [
+        "lighting"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-18",
+      "equipment_id": "light-02",
+      "borrower_alias": "borrower-06",
+      "starts_at": "2026-11-11T01:00:00+00:00",
+      "ends_at": "2026-11-11T02:00:00+00:00",
+      "required_capabilities": [
+        "lighting"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-19",
+      "equipment_id": "projector-01",
+      "borrower_alias": "borrower-01",
+      "starts_at": "2026-11-10T03:00:00+00:00",
+      "ends_at": "2026-11-10T04:00:00+00:00",
+      "required_capabilities": [
+        "presentation"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "id": "booking-20",
+      "equipment_id": "projector-01",
+      "borrower_alias": "borrower-02",
+      "starts_at": "2026-11-11T03:00:00+00:00",
+      "ends_at": "2026-11-11T04:00:00+00:00",
+      "required_capabilities": [
+        "presentation"
+      ],
+      "status": "ACTIVE",
+      "version": 1,
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    }
+  ],
+  "agent_registry": [
+    {
+      "agent_id": "impact-agent",
+      "display_name": "ImpactAgent",
+      "role": "impact",
+      "skills": [
+        "impact_analysis"
+      ],
+      "allowed_tools": [
+        "get_incident",
+        "get_impacted_reservations",
+        "get_booking_rules",
+        "append_run_step"
+      ],
+      "enabled": true,
+      "prompt_version": "v1",
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "agent_id": "planner-agent",
+      "display_name": "PlannerAgent",
+      "role": "planner",
+      "skills": [
+        "scheduling"
+      ],
+      "allowed_tools": [
+        "get_incident",
+        "get_impacted_reservations",
+        "list_equipment_candidates",
+        "get_booking_rules",
+        "validate_candidate_plan",
+        "append_run_step"
+      ],
+      "enabled": true,
+      "prompt_version": "v1",
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    },
+    {
+      "agent_id": "verifier-agent",
+      "display_name": "VerifierAgent",
+      "role": "verifier",
+      "skills": [
+        "verification"
+      ],
+      "allowed_tools": [
+        "get_incident",
+        "get_impacted_reservations",
+        "list_equipment_candidates",
+        "get_booking_rules",
+        "validate_candidate_plan",
+        "append_run_step"
+      ],
+      "enabled": true,
+      "prompt_version": "v1",
+      "updated_at": "2026-11-05T00:00:00.000000+00:00"
+    }
+  ]
+}

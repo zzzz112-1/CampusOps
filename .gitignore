@@ -1,0 +1,38 @@
+# Local linked worktrees, environments and secrets
+/.worktrees/
+.venv/
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials*.json
+
+# Local data, SQLite sidecars, logs and scratch
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+var/
+.tmp/
+*.tmp
+*.log
+.cache/
+
+# Python and test/build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+junit*.xml
+build/
+dist/
+# Generated local deliverables are sealed explicitly; keep editable sources in docs/scripts.
+/output/
+.ruff_cache/
+.mypy_cache/

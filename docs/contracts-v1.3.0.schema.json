@@ -1,0 +1,2910 @@
+{
+  "contract_version": "1.3.0",
+  "models": {
+    "ServiceError": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ServiceError",
+      "type": "object"
+    },
+    "IncidentCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "equipment_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Equipment Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "equipment_failure",
+          "default": "equipment_failure",
+          "title": "Kind",
+          "type": "string"
+        },
+        "effective_at": {
+          "format": "date-time",
+          "title": "Effective At",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "equipment_id",
+        "effective_at",
+        "reason"
+      ],
+      "title": "IncidentCreate",
+      "type": "object"
+    },
+    "Incident": {
+      "additionalProperties": false,
+      "properties": {
+        "equipment_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Equipment Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "equipment_failure",
+          "default": "equipment_failure",
+          "title": "Kind",
+          "type": "string"
+        },
+        "effective_at": {
+          "format": "date-time",
+          "title": "Effective At",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "default": "OPEN",
+          "enum": [
+            "OPEN",
+            "RESOLVED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "equipment_id",
+        "effective_at",
+        "reason",
+        "id",
+        "created_at"
+      ],
+      "title": "Incident",
+      "type": "object"
+    },
+    "Equipment": {
+      "$defs": {
+        "EquipmentStatus": {
+          "enum": [
+            "AVAILABLE",
+            "FAULTED",
+            "MAINTENANCE"
+          ],
+          "title": "EquipmentStatus",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "category": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Category",
+          "type": "string"
+        },
+        "capabilities": {
+          "items": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/EquipmentStatus"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "capabilities",
+        "status",
+        "version",
+        "updated_at"
+      ],
+      "title": "Equipment",
+      "type": "object"
+    },
+    "TimeWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "starts_at",
+        "ends_at"
+      ],
+      "title": "TimeWindow",
+      "type": "object"
+    },
+    "Reservation": {
+      "$defs": {
+        "ReservationStatus": {
+          "enum": [
+            "ACTIVE",
+            "CANCELLED"
+          ],
+          "title": "ReservationStatus",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "equipment_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Equipment Id",
+          "type": "string"
+        },
+        "borrower_alias": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Borrower Alias",
+          "type": "string"
+        },
+        "required_capabilities": {
+          "items": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Required Capabilities",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/ReservationStatus"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "starts_at",
+        "ends_at",
+        "id",
+        "equipment_id",
+        "borrower_alias",
+        "required_capabilities",
+        "status",
+        "version",
+        "updated_at"
+      ],
+      "title": "Reservation",
+      "type": "object"
+    },
+    "ProposalItem": {
+      "additionalProperties": false,
+      "properties": {
+        "starts_at": {
+          "format": "date-time",
+          "title": "Starts At",
+          "type": "string"
+        },
+        "ends_at": {
+          "format": "date-time",
+          "title": "Ends At",
+          "type": "string"
+        },
+        "reservation_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Reservation Id",
+          "type": "string"
+        },
+        "from_equipment_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "From Equipment Id",
+          "type": "string"
+        },
+        "to_equipment_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "To Equipment Id",
+          "type": "string"
+        },
+        "expected_reservation_version": {
+          "minimum": 1,
+          "title": "Expected Reservation Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "starts_at",
+        "ends_at",
+        "reservation_id",
+        "from_equipment_id",
+        "to_equipment_id",
+        "expected_reservation_version"
+      ],
+      "title": "ProposalItem",
+      "type": "object"
+    },
+    "ValidationIssue": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "entity_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entity Id"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ValidationIssue",
+      "type": "object"
+    },
+    "ValidationResult": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        },
+        "ValidationIssue": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            },
+            "entity_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Entity Id"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ValidationIssue",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "violations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ValidationIssue"
+          },
+          "title": "Violations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "passed"
+      ],
+      "title": "ValidationResult",
+      "type": "object"
+    },
+    "PlanResult": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        },
+        "ProposalItem": {
+          "additionalProperties": false,
+          "properties": {
+            "starts_at": {
+              "format": "date-time",
+              "title": "Starts At",
+              "type": "string"
+            },
+            "ends_at": {
+              "format": "date-time",
+              "title": "Ends At",
+              "type": "string"
+            },
+            "reservation_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Reservation Id",
+              "type": "string"
+            },
+            "from_equipment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "From Equipment Id",
+              "type": "string"
+            },
+            "to_equipment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "To Equipment Id",
+              "type": "string"
+            },
+            "expected_reservation_version": {
+              "minimum": 1,
+              "title": "Expected Reservation Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "starts_at",
+            "ends_at",
+            "reservation_id",
+            "from_equipment_id",
+            "to_equipment_id",
+            "expected_reservation_version"
+          ],
+          "title": "ProposalItem",
+          "type": "object"
+        },
+        "ServiceError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ServiceError",
+          "type": "object"
+        },
+        "ValidationIssue": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            },
+            "entity_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Entity Id"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ValidationIssue",
+          "type": "object"
+        },
+        "ValidationResult": {
+          "additionalProperties": false,
+          "properties": {
+            "passed": {
+              "title": "Passed",
+              "type": "boolean"
+            },
+            "issues": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Issues",
+              "type": "array"
+            },
+            "evidence_ids": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Evidence Ids",
+              "type": "array"
+            },
+            "violations": {
+              "default": [],
+              "items": {
+                "$ref": "#/$defs/ValidationIssue"
+              },
+              "title": "Violations",
+              "type": "array"
+            }
+          },
+          "required": [
+            "passed"
+          ],
+          "title": "ValidationResult",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "incident_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Incident Id",
+          "type": "string"
+        },
+        "proposal_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposal Id"
+        },
+        "status": {
+          "enum": [
+            "WAIT_APPROVAL",
+            "NO_IMPACT",
+            "NEEDS_MANUAL",
+            "FAILED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "changes": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ProposalItem"
+          },
+          "title": "Changes",
+          "type": "array"
+        },
+        "validation": {
+          "$ref": "#/$defs/ValidationResult"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServiceError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "run_id",
+        "incident_id",
+        "status",
+        "validation",
+        "explanation"
+      ],
+      "title": "PlanResult",
+      "type": "object"
+    },
+    "ApplyResult": {
+      "$defs": {
+        "ApplyStatus": {
+          "enum": [
+            "APPLIED",
+            "STALE",
+            "REJECTED",
+            "FAILED"
+          ],
+          "title": "ApplyStatus",
+          "type": "string"
+        },
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        },
+        "ServiceError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ServiceError",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Proposal Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ApplyStatus"
+        },
+        "changed_reservation_ids": {
+          "default": [],
+          "items": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "title": "Changed Reservation Ids",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServiceError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "proposal_id",
+        "status",
+        "message"
+      ],
+      "title": "ApplyResult",
+      "type": "object"
+    },
+    "AgentConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "display_name": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "impact",
+            "planner",
+            "verifier"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "skills": {
+          "items": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Skills",
+          "type": "array"
+        },
+        "allowed_tools": {
+          "items": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allowed Tools",
+          "type": "array"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "prompt_version": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent_id",
+        "display_name",
+        "role",
+        "skills",
+        "allowed_tools",
+        "enabled",
+        "prompt_version",
+        "updated_at"
+      ],
+      "title": "AgentConfig",
+      "type": "object"
+    },
+    "AgentConfigPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enabled"
+        },
+        "prompt_version": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prompt Version"
+        }
+      },
+      "title": "AgentConfigPatch",
+      "type": "object"
+    },
+    "BookingRules": {
+      "additionalProperties": false,
+      "properties": {
+        "storage_timezone": {
+          "const": "UTC",
+          "default": "UTC",
+          "title": "Storage Timezone",
+          "type": "string"
+        },
+        "display_timezone": {
+          "const": "Asia/Shanghai",
+          "default": "Asia/Shanghai",
+          "title": "Display Timezone",
+          "type": "string"
+        },
+        "interval_semantics": {
+          "const": "[start,end)",
+          "default": "[start,end)",
+          "title": "Interval Semantics",
+          "type": "string"
+        },
+        "preserve_original_times": {
+          "const": true,
+          "default": true,
+          "title": "Preserve Original Times",
+          "type": "boolean"
+        },
+        "max_replans": {
+          "const": 2,
+          "default": 2,
+          "title": "Max Replans",
+          "type": "integer"
+        }
+      },
+      "title": "BookingRules",
+      "type": "object"
+    },
+    "ResourceSnapshot": {
+      "$defs": {
+        "Equipment": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Id",
+              "type": "string"
+            },
+            "name": {
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            },
+            "category": {
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Category",
+              "type": "string"
+            },
+            "capabilities": {
+              "items": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Capabilities",
+              "type": "array"
+            },
+            "status": {
+              "$ref": "#/$defs/EquipmentStatus"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            },
+            "updated_at": {
+              "format": "date-time",
+              "title": "Updated At",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "category",
+            "capabilities",
+            "status",
+            "version",
+            "updated_at"
+          ],
+          "title": "Equipment",
+          "type": "object"
+        },
+        "EquipmentStatus": {
+          "enum": [
+            "AVAILABLE",
+            "FAULTED",
+            "MAINTENANCE"
+          ],
+          "title": "EquipmentStatus",
+          "type": "string"
+        },
+        "Incident": {
+          "additionalProperties": false,
+          "properties": {
+            "equipment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Equipment Id",
+              "type": "string"
+            },
+            "kind": {
+              "const": "equipment_failure",
+              "default": "equipment_failure",
+              "title": "Kind",
+              "type": "string"
+            },
+            "effective_at": {
+              "format": "date-time",
+              "title": "Effective At",
+              "type": "string"
+            },
+            "reason": {
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Reason",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Id",
+              "type": "string"
+            },
+            "status": {
+              "default": "OPEN",
+              "enum": [
+                "OPEN",
+                "RESOLVED"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            }
+          },
+          "required": [
+            "equipment_id",
+            "effective_at",
+            "reason",
+            "id",
+            "created_at"
+          ],
+          "title": "Incident",
+          "type": "object"
+        },
+        "Reservation": {
+          "additionalProperties": false,
+          "properties": {
+            "starts_at": {
+              "format": "date-time",
+              "title": "Starts At",
+              "type": "string"
+            },
+            "ends_at": {
+              "format": "date-time",
+              "title": "Ends At",
+              "type": "string"
+            },
+            "id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Id",
+              "type": "string"
+            },
+            "equipment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Equipment Id",
+              "type": "string"
+            },
+            "borrower_alias": {
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Borrower Alias",
+              "type": "string"
+            },
+            "required_capabilities": {
+              "items": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": "Required Capabilities",
+              "type": "array"
+            },
+            "status": {
+              "$ref": "#/$defs/ReservationStatus"
+            },
+            "version": {
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            },
+            "updated_at": {
+              "format": "date-time",
+              "title": "Updated At",
+              "type": "string"
+            }
+          },
+          "required": [
+            "starts_at",
+            "ends_at",
+            "id",
+            "equipment_id",
+            "borrower_alias",
+            "required_capabilities",
+            "status",
+            "version",
+            "updated_at"
+          ],
+          "title": "Reservation",
+          "type": "object"
+        },
+        "ReservationStatus": {
+          "enum": [
+            "ACTIVE",
+            "CANCELLED"
+          ],
+          "title": "ReservationStatus",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "fingerprint": {
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "equipment": {
+          "items": {
+            "$ref": "#/$defs/Equipment"
+          },
+          "title": "Equipment",
+          "type": "array"
+        },
+        "reservations": {
+          "items": {
+            "$ref": "#/$defs/Reservation"
+          },
+          "title": "Reservations",
+          "type": "array"
+        },
+        "incidents": {
+          "items": {
+            "$ref": "#/$defs/Incident"
+          },
+          "title": "Incidents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "fingerprint",
+        "equipment",
+        "reservations",
+        "incidents"
+      ],
+      "title": "ResourceSnapshot",
+      "type": "object"
+    },
+    "RunStepCreate": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        },
+        "RunStatus": {
+          "enum": [
+            "CREATED",
+            "SCOPING",
+            "PLANNING",
+            "VERIFYING",
+            "WAIT_APPROVAL",
+            "APPLYING",
+            "APPLIED",
+            "NO_IMPACT",
+            "REPLANNING",
+            "NEEDS_MANUAL",
+            "REJECTED",
+            "STALE",
+            "FAILED"
+          ],
+          "title": "RunStatus",
+          "type": "string"
+        },
+        "ServiceError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ServiceError",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "node": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Node",
+          "type": "string"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "tool_name": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Name"
+        },
+        "decision_reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Decision Reason",
+          "type": "string"
+        },
+        "input_digest": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Input Digest",
+          "type": "string"
+        },
+        "output_digest": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Output Digest",
+          "type": "string"
+        },
+        "duration_ms": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServiceError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "model_calls": {
+          "default": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Model Calls",
+          "type": "integer"
+        },
+        "retry_count": {
+          "default": 0,
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Retry Count",
+          "type": "integer"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "run_id",
+        "node",
+        "decision_reason"
+      ],
+      "title": "RunStepCreate",
+      "type": "object"
+    },
+    "RunStep": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        },
+        "ExecutionMode": {
+          "enum": [
+            "system",
+            "real_api",
+            "offline_mock_test",
+            "failure_injection_test",
+            "demo_fixture"
+          ],
+          "title": "ExecutionMode",
+          "type": "string"
+        },
+        "RunStatus": {
+          "enum": [
+            "CREATED",
+            "SCOPING",
+            "PLANNING",
+            "VERIFYING",
+            "WAIT_APPROVAL",
+            "APPLYING",
+            "APPLIED",
+            "NO_IMPACT",
+            "REPLANNING",
+            "NEEDS_MANUAL",
+            "REJECTED",
+            "STALE",
+            "FAILED"
+          ],
+          "title": "RunStatus",
+          "type": "string"
+        },
+        "ServiceError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ServiceError",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "node": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Node",
+          "type": "string"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "tool_name": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Name"
+        },
+        "decision_reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Decision Reason",
+          "type": "string"
+        },
+        "input_digest": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Input Digest",
+          "type": "string"
+        },
+        "output_digest": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Output Digest",
+          "type": "string"
+        },
+        "duration_ms": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServiceError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "model_calls": {
+          "default": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Model Calls",
+          "type": "integer"
+        },
+        "retry_count": {
+          "default": 0,
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Retry Count",
+          "type": "integer"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "seq": {
+          "minimum": 1,
+          "title": "Seq",
+          "type": "integer"
+        },
+        "execution_mode": {
+          "$ref": "#/$defs/ExecutionMode"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "node",
+        "decision_reason",
+        "id",
+        "seq",
+        "execution_mode",
+        "created_at"
+      ],
+      "title": "RunStep",
+      "type": "object"
+    },
+    "WorkflowRun": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        },
+        "ExecutionMode": {
+          "enum": [
+            "system",
+            "real_api",
+            "offline_mock_test",
+            "failure_injection_test",
+            "demo_fixture"
+          ],
+          "title": "ExecutionMode",
+          "type": "string"
+        },
+        "PlanResult": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Run Id",
+              "type": "string"
+            },
+            "incident_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Incident Id",
+              "type": "string"
+            },
+            "proposal_id": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Proposal Id"
+            },
+            "status": {
+              "enum": [
+                "WAIT_APPROVAL",
+                "NO_IMPACT",
+                "NEEDS_MANUAL",
+                "FAILED"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "changes": {
+              "default": [],
+              "items": {
+                "$ref": "#/$defs/ProposalItem"
+              },
+              "title": "Changes",
+              "type": "array"
+            },
+            "validation": {
+              "$ref": "#/$defs/ValidationResult"
+            },
+            "explanation": {
+              "title": "Explanation",
+              "type": "string"
+            },
+            "error": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ServiceError"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "required": [
+            "run_id",
+            "incident_id",
+            "status",
+            "validation",
+            "explanation"
+          ],
+          "title": "PlanResult",
+          "type": "object"
+        },
+        "ProposalItem": {
+          "additionalProperties": false,
+          "properties": {
+            "starts_at": {
+              "format": "date-time",
+              "title": "Starts At",
+              "type": "string"
+            },
+            "ends_at": {
+              "format": "date-time",
+              "title": "Ends At",
+              "type": "string"
+            },
+            "reservation_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Reservation Id",
+              "type": "string"
+            },
+            "from_equipment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "From Equipment Id",
+              "type": "string"
+            },
+            "to_equipment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "To Equipment Id",
+              "type": "string"
+            },
+            "expected_reservation_version": {
+              "minimum": 1,
+              "title": "Expected Reservation Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "starts_at",
+            "ends_at",
+            "reservation_id",
+            "from_equipment_id",
+            "to_equipment_id",
+            "expected_reservation_version"
+          ],
+          "title": "ProposalItem",
+          "type": "object"
+        },
+        "RunStatus": {
+          "enum": [
+            "CREATED",
+            "SCOPING",
+            "PLANNING",
+            "VERIFYING",
+            "WAIT_APPROVAL",
+            "APPLYING",
+            "APPLIED",
+            "NO_IMPACT",
+            "REPLANNING",
+            "NEEDS_MANUAL",
+            "REJECTED",
+            "STALE",
+            "FAILED"
+          ],
+          "title": "RunStatus",
+          "type": "string"
+        },
+        "ServiceError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ServiceError",
+          "type": "object"
+        },
+        "ValidationIssue": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            },
+            "entity_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Entity Id"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ValidationIssue",
+          "type": "object"
+        },
+        "ValidationResult": {
+          "additionalProperties": false,
+          "properties": {
+            "passed": {
+              "title": "Passed",
+              "type": "boolean"
+            },
+            "issues": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Issues",
+              "type": "array"
+            },
+            "evidence_ids": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Evidence Ids",
+              "type": "array"
+            },
+            "violations": {
+              "default": [],
+              "items": {
+                "$ref": "#/$defs/ValidationIssue"
+              },
+              "title": "Violations",
+              "type": "array"
+            }
+          },
+          "required": [
+            "passed"
+          ],
+          "title": "ValidationResult",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "incident_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Incident Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RunStatus"
+        },
+        "execution_mode": {
+          "$ref": "#/$defs/ExecutionMode"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_calls": {
+          "minimum": 0,
+          "title": "Model Calls",
+          "type": "integer"
+        },
+        "retry_count": {
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Retry Count",
+          "type": "integer"
+        },
+        "snapshot_fingerprint": {
+          "title": "Snapshot Fingerprint",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlanResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServiceError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "incident_id",
+        "status",
+        "execution_mode",
+        "model_calls",
+        "retry_count",
+        "snapshot_fingerprint",
+        "created_at"
+      ],
+      "title": "WorkflowRun",
+      "type": "object"
+    },
+    "Proposal": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        },
+        "ProposalItem": {
+          "additionalProperties": false,
+          "properties": {
+            "starts_at": {
+              "format": "date-time",
+              "title": "Starts At",
+              "type": "string"
+            },
+            "ends_at": {
+              "format": "date-time",
+              "title": "Ends At",
+              "type": "string"
+            },
+            "reservation_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Reservation Id",
+              "type": "string"
+            },
+            "from_equipment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "From Equipment Id",
+              "type": "string"
+            },
+            "to_equipment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "To Equipment Id",
+              "type": "string"
+            },
+            "expected_reservation_version": {
+              "minimum": 1,
+              "title": "Expected Reservation Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "starts_at",
+            "ends_at",
+            "reservation_id",
+            "from_equipment_id",
+            "to_equipment_id",
+            "expected_reservation_version"
+          ],
+          "title": "ProposalItem",
+          "type": "object"
+        },
+        "ProposalStatus": {
+          "enum": [
+            "PROPOSED",
+            "VALIDATED",
+            "APPLIED",
+            "REJECTED",
+            "STALE"
+          ],
+          "title": "ProposalStatus",
+          "type": "string"
+        },
+        "ValidationIssue": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            },
+            "entity_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Entity Id"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ValidationIssue",
+          "type": "object"
+        },
+        "ValidationResult": {
+          "additionalProperties": false,
+          "properties": {
+            "passed": {
+              "title": "Passed",
+              "type": "boolean"
+            },
+            "issues": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Issues",
+              "type": "array"
+            },
+            "evidence_ids": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Evidence Ids",
+              "type": "array"
+            },
+            "violations": {
+              "default": [],
+              "items": {
+                "$ref": "#/$defs/ValidationIssue"
+              },
+              "title": "Violations",
+              "type": "array"
+            }
+          },
+          "required": [
+            "passed"
+          ],
+          "title": "ValidationResult",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "run_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "incident_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Incident Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ProposalStatus"
+        },
+        "snapshot_fingerprint": {
+          "title": "Snapshot Fingerprint",
+          "type": "string"
+        },
+        "changes": {
+          "items": {
+            "$ref": "#/$defs/ProposalItem"
+          },
+          "title": "Changes",
+          "type": "array"
+        },
+        "validation": {
+          "$ref": "#/$defs/ValidationResult"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "run_id",
+        "incident_id",
+        "status",
+        "snapshot_fingerprint",
+        "changes",
+        "validation",
+        "explanation",
+        "created_at"
+      ],
+      "title": "Proposal",
+      "type": "object"
+    },
+    "ModelMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "system",
+            "user",
+            "assistant",
+            "tool"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "title": "ModelMessage",
+      "type": "object"
+    },
+    "ModelRequest": {
+      "$defs": {
+        "ModelMessage": {
+          "additionalProperties": false,
+          "properties": {
+            "role": {
+              "enum": [
+                "system",
+                "user",
+                "assistant",
+                "tool"
+              ],
+              "title": "Role",
+              "type": "string"
+            },
+            "content": {
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "role",
+            "content"
+          ],
+          "title": "ModelMessage",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "agent_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/ModelMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "response_schema": {
+          "title": "Response Schema",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "agent_id",
+        "messages",
+        "response_schema"
+      ],
+      "title": "ModelRequest",
+      "type": "object"
+    },
+    "ModelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "provider": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "model_id": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Model Id",
+          "type": "string"
+        },
+        "input_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Tokens"
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Tokens"
+        }
+      },
+      "required": [
+        "content",
+        "provider",
+        "model_id"
+      ],
+      "title": "ModelResponse",
+      "type": "object"
+    },
+    "ModelUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "utc_date": {
+          "title": "Utc Date",
+          "type": "string"
+        },
+        "daily_model_calls": {
+          "minimum": 0,
+          "title": "Daily Model Calls",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "utc_date",
+        "daily_model_calls"
+      ],
+      "title": "ModelUsage",
+      "type": "object"
+    },
+    "ApprovalDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Proposal Id",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "APPROVE",
+            "REJECT"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "actor_alias": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Actor Alias",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "proposal_id",
+        "decision",
+        "actor_alias",
+        "created_at"
+      ],
+      "title": "ApprovalDecision",
+      "type": "object"
+    },
+    "ModelBudgetSnapshot": {
+      "$defs": {
+        "ErrorCode": {
+          "enum": [
+            "NOT_IMPLEMENTED",
+            "NOT_FOUND",
+            "INVALID_STATE",
+            "INVALID_INPUT",
+            "INVALID_PROPOSAL",
+            "RESOURCE_UNAVAILABLE",
+            "CAPABILITY_MISMATCH",
+            "RESERVATION_OVERLAP",
+            "SNAPSHOT_CONFLICT",
+            "INCOMPLETE_PLAN",
+            "IDEMPOTENCY_CONFLICT",
+            "ALREADY_DECIDED",
+            "DATABASE_BUSY",
+            "DATABASE_ERROR",
+            "WORKFLOW_FAILED",
+            "PROVIDER_UNAVAILABLE",
+            "BUDGET_EXCEEDED"
+          ],
+          "title": "ErrorCode",
+          "type": "string"
+        },
+        "ServiceError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ServiceError",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Conservative pre-attempt reservations, not tokens, money or account quota.",
+      "properties": {
+        "run_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "scope": {
+          "const": "current_worktree",
+          "default": "current_worktree",
+          "title": "Scope",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "AVAILABLE",
+            "UNAVAILABLE"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "utc_date": {
+          "format": "date",
+          "title": "Utc Date",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "per_run_limit": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Per Run Limit"
+        },
+        "daily_limit": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Daily Limit"
+        },
+        "run_reserved": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Reserved"
+        },
+        "daily_reserved": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Daily Reserved"
+        },
+        "run_remaining": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Remaining"
+        },
+        "daily_remaining": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Daily Remaining"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServiceError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "run_id",
+        "status",
+        "utc_date",
+        "observed_at"
+      ],
+      "title": "ModelBudgetSnapshot",
+      "type": "object"
+    },
+    "AgentRuntimeConfigPatch": {
+      "additionalProperties": false,
+      "description": "Additive patch; the original 1.0 AgentConfigPatch remains unchanged.",
+      "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enabled"
+        },
+        "prompt_version": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prompt Version"
+        },
+        "allowed_tools": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 6,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Allowed Tools"
+        }
+      },
+      "title": "AgentRuntimeConfigPatch",
+      "type": "object"
+    },
+    "BookingRuleDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "rule_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Version",
+          "type": "string"
+        },
+        "content": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Content",
+          "type": "string"
+        },
+        "source": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "fictional": {
+          "const": true,
+          "default": true,
+          "title": "Fictional",
+          "type": "boolean"
+        },
+        "incident_kind": {
+          "const": "equipment_failure",
+          "default": "equipment_failure",
+          "title": "Incident Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "version",
+        "content",
+        "source"
+      ],
+      "title": "BookingRuleDocument",
+      "type": "object"
+    },
+    "BookingRuleCatalog": {
+      "$defs": {
+        "BookingRuleDocument": {
+          "additionalProperties": false,
+          "properties": {
+            "rule_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Rule Id",
+              "type": "string"
+            },
+            "version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+              "title": "Version",
+              "type": "string"
+            },
+            "content": {
+              "maxLength": 2000,
+              "minLength": 1,
+              "title": "Content",
+              "type": "string"
+            },
+            "source": {
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Source",
+              "type": "string"
+            },
+            "fictional": {
+              "const": true,
+              "default": true,
+              "title": "Fictional",
+              "type": "boolean"
+            },
+            "incident_kind": {
+              "const": "equipment_failure",
+              "default": "equipment_failure",
+              "title": "Incident Kind",
+              "type": "string"
+            }
+          },
+          "required": [
+            "rule_id",
+            "version",
+            "content",
+            "source"
+          ],
+          "title": "BookingRuleDocument",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Runtime subtype carrying the actually matched fictional local rules.",
+      "properties": {
+        "storage_timezone": {
+          "const": "UTC",
+          "default": "UTC",
+          "title": "Storage Timezone",
+          "type": "string"
+        },
+        "display_timezone": {
+          "const": "Asia/Shanghai",
+          "default": "Asia/Shanghai",
+          "title": "Display Timezone",
+          "type": "string"
+        },
+        "interval_semantics": {
+          "const": "[start,end)",
+          "default": "[start,end)",
+          "title": "Interval Semantics",
+          "type": "string"
+        },
+        "preserve_original_times": {
+          "const": true,
+          "default": true,
+          "title": "Preserve Original Times",
+          "type": "boolean"
+        },
+        "max_replans": {
+          "const": 2,
+          "default": 2,
+          "title": "Max Replans",
+          "type": "integer"
+        },
+        "ruleset_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Ruleset Id",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "title": "Version",
+          "type": "string"
+        },
+        "source": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "fictional": {
+          "const": true,
+          "default": true,
+          "title": "Fictional",
+          "type": "boolean"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/BookingRuleDocument"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Rules",
+          "type": "array"
+        },
+        "fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ruleset_id",
+        "version",
+        "source",
+        "rules",
+        "fingerprint"
+      ],
+      "title": "BookingRuleCatalog",
+      "type": "object"
+    }
+  },
+  "ports": {
+    "ModelClientPort": {
+      "complete": "(self, request: campusops.contracts.models.ModelRequest) -> campusops.contracts.models.ModelResponse"
+    },
+    "ReadonlyPort": {
+      "append_run_step": "(self, step: campusops.contracts.models.RunStepCreate) -> campusops.contracts.models.RunStep",
+      "get_booking_rules": "(self) -> campusops.contracts.models.BookingRules",
+      "get_impacted_reservations": "(self, incident_id: str) -> tuple[campusops.contracts.models.Reservation, ...]",
+      "get_incident": "(self, incident_id: str) -> campusops.contracts.models.Incident",
+      "get_model_usage": "(self) -> campusops.contracts.models.ModelUsage",
+      "get_snapshot": "(self) -> campusops.contracts.models.ResourceSnapshot",
+      "list_agent_configs": "(self) -> tuple[campusops.contracts.models.AgentConfig, ...]",
+      "list_equipment_candidates": "(self, reservation_id: str) -> tuple[campusops.contracts.models.Equipment, ...]",
+      "validate_candidate_plan": "(self, changes: tuple[campusops.contracts.models.ProposalItem, ...]) -> campusops.contracts.models.ValidationResult"
+    },
+    "OrchestrationPort": {
+      "run_incident": "(self, incident_id: str, run_id: str, readonly_port: campusops.contracts.ports.ReadonlyPort, model_client: campusops.contracts.ports.ModelClientPort | None) -> campusops.contracts.models.PlanResult"
+    },
+    "ApplicationPort": {
+      "approve_proposal": "(self, proposal_id: str, actor_alias: str, idempotency_key: str) -> campusops.contracts.models.ApplyResult",
+      "get_approval_decision": "(self, proposal_id: str) -> campusops.contracts.models.ApprovalDecision | None",
+      "get_model_budget": "(self, run_id: str) -> campusops.contracts.models.ModelBudgetSnapshot",
+      "get_proposal": "(self, proposal_id: str) -> campusops.contracts.models.Proposal",
+      "get_run": "(self, run_id: str) -> campusops.contracts.models.WorkflowRun",
+      "list_agent_configs": "(self) -> tuple[campusops.contracts.models.AgentConfig, ...]",
+      "list_equipment": "(self) -> tuple[campusops.contracts.models.Equipment, ...]",
+      "list_incidents": "(self) -> tuple[campusops.contracts.models.Incident, ...]",
+      "list_reservations": "(self) -> tuple[campusops.contracts.models.Reservation, ...]",
+      "list_run_steps": "(self, run_id: str) -> tuple[campusops.contracts.models.RunStep, ...]",
+      "list_runs": "(self) -> tuple[campusops.contracts.models.WorkflowRun, ...]",
+      "register_equipment_failure": "(self, incident: campusops.contracts.models.IncidentCreate) -> campusops.contracts.models.Incident",
+      "reject_proposal": "(self, proposal_id: str, actor_alias: str, reason: str) -> campusops.contracts.models.ApplyResult",
+      "reset_demo_data": "(self, confirmation: str) -> None",
+      "start_workflow": "(self, incident_id: str) -> campusops.contracts.models.PlanResult",
+      "update_agent_config": "(self, agent_id: str, patch: campusops.contracts.models.AgentConfigPatch) -> campusops.contracts.models.AgentConfig"
+    },
+    "ModelBudgetPort": {
+      "get_model_budget": "(self, run_id: str) -> campusops.contracts.models.ModelBudgetSnapshot"
+    },
+    "BookingRulesPort": {
+      "get_booking_rules": "(self) -> campusops.contracts.models.BookingRuleCatalog"
+    }
+  }
+}
