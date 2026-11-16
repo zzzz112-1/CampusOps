@@ -1,3 +1,8 @@
+> **比赛无锁评审版：RC15-Review-1（0.2.0rc15.post1）**  
+> 无需个人验证码、Owner工具或预先绑定，自动初始化独立虚构数据。  
+> [评审分支](https://github.com/zzzz112-1/CampusOps/tree/reviewer-unlocked) · [固定源码提交](https://github.com/zzzz112-1/CampusOps/tree/58e684e465295a31ebf3cec1704e27d01b001231) · [Release与运行包](https://github.com/zzzz112-1/CampusOps/releases/tag/RC15-Review-1)  
+> 固定提交：`58e684e465295a31ebf3cec1704e27d01b001231`。下方保留原加锁RC15的历史说明；评审请使用上述新入口。默认分支原运行代码仍保留TOTP。
+
 # CampusOps / GearShift — 0.2.0rc15
 
 奇点计划团队的 CampusOps 初赛源码与复现说明。
