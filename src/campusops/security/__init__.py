@@ -1,1 +1,1 @@
-"""Single-factor local entry lock; not licensing or a verified personal identity."""
+"""Review branch access adapter; legacy TOTP implementation is not an entry path."""

@@ -1,5 +1,5 @@
-"""Thin per-call access checks; original business/approval code stays unchanged."""
-from .sessions import AccessContext
+"""Reviewer destination checks; business and approval validation are unchanged."""
+from campusops.reviewer import ReviewerContext
 
 MUTATIONS = frozenset({"register_equipment_failure", "start_workflow", "start_workflow_once",
                        "approve_proposal", "reject_proposal", "update_agent_config", "reset_demo_data", "recover_equipment",
@@ -7,7 +7,12 @@ MUTATIONS = frozenset({"register_equipment_failure", "start_workflow", "start_wo
                        "create_equipment","update_equipment","archive_equipment","restore_equipment"})
 
 
-def protect_service(service, access: AccessContext):
+def protect_service(service, access: ReviewerContext):
+    if not isinstance(access, ReviewerContext):
+        raise TypeError("ReviewerContext required")
+    access.require()
+    if service._database.path != access.database:
+        raise ValueError("Reviewer database destination mismatch")
     # Explicit methods preserve runtime-checkable optional-port detection.
     from campusops.contracts import ports
     names = set()

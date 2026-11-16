@@ -7,6 +7,9 @@ address = "127.0.0.1"
 enableXsrfProtection = true
 enableCORS = true
 
+[browser]
+gatherUsageStats = false
+
 [theme]
 base = "light"
 primaryColor = "#315d90"

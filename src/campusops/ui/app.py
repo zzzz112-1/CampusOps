@@ -799,19 +799,19 @@ def _agent_settings(service: ApplicationPort, configs, *, read_only: bool):
 def render_app(service: ApplicationPort, *, reset_target: Path | None = None, entry_notice: str | None = None,
                read_only: bool = False):
     """Render an explicit port; tests supply their fixtures through this seam only."""
-    from campusops.security.streamlit_gate import require_ui_access, render_lock_button, touch_user_activity
+    from campusops.security.streamlit_gate import require_ui_access, render_clear_button, touch_user_activity
     from campusops.security.service import protect_service
     access = require_ui_access()
     if access is None:
         return
     service = protect_service(service, access)
-    st.set_page_config(page_title="CampusOps · GearShift", page_icon="🎒", layout="wide", initial_sidebar_state="collapsed")
+    st.set_page_config(page_title="CampusOps · 无锁评审版", page_icon="🎒", layout="wide", initial_sidebar_state="collapsed")
     st.markdown(APP_STYLES, unsafe_allow_html=True)
     brand, context = st.columns([3, 1], vertical_alignment="center")
-    brand.title("CampusOps · GearShift")
+    brand.title("CampusOps · 无锁评审版")
     with context:
-        render_lock_button()
-    brand.caption("校园器材协同工作台 · 本地虚构记录 · 北京时间")
+        render_clear_button()
+    brand.caption("无锁评审版 · 使用独立演示数据")
     if entry_notice:
         st.warning(safe_text(entry_notice))
     if read_only:
@@ -833,11 +833,6 @@ def render_app(service: ApplicationPort, *, reset_target: Path | None = None, en
         else:
             _monitor(controller)
     except CampusOpsError as exc:
-        from campusops.security.errors import AccessDenied
-        if isinstance(exc, AccessDenied):
-            from campusops.security.streamlit_gate import lock_session
-            lock_session()
-            st.rerun()
         _show_error(exc.error)
     except UiInputError as exc:
         st.warning(safe_text(exc))
@@ -864,29 +859,8 @@ def render_app(service: ApplicationPort, *, reset_target: Path | None = None, en
 
 
 def main():
-    # No model injection, fallback, .env loading, seed or migration in the UI.
-    from campusops.security.streamlit_gate import require_ui_access
-    if require_ui_access() is None:
-        return
-    try:
-        service = create_application()
-        root = Path(__file__).resolve().parents[3]
-        expected = root / "var/data/campusops.db"
-        configured = Path(os.environ.get("DATABASE_PATH") or Path.cwd() / "var/data/campusops.db")
-        reset_target = expected if configured.resolve() == expected.resolve() else None
-    except CampusOpsError as exc:
-        st.set_page_config(page_title="CampusOps · GearShift")
-        _show_error(exc.error)
-        return
-    except Exception:
-        st.set_page_config(page_title="CampusOps · GearShift")
-        st.error("应用服务未能启动，请核对本工作树的本地配置后重试。")
-        return
-    render_app(
-        service, reset_target=reset_target,
-        entry_notice="当前为低层开发入口，未组合正式调度器。正式演示请从项目根目录启动 streamlit_app.py。",
-    )
-
+    from campusops.reviewer import run_ui
+    run_ui()
 
 if __name__ == "__main__":
     main()

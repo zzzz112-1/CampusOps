@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "campusops"
-version = "0.2.0rc15"
+version = "0.2.0rc15.post1"
 description = "GearShift campus equipment incident rescheduling foundation"
 requires-python = ">=3.12,<3.13"
 dependencies = [

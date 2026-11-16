@@ -1,4 +1,4 @@
-"""Main-owned composition factory. Does not seed, migrate or call any model."""
+"""Review branch composition; normal configured entry owns isolated bootstrap."""
 
 import os
 from pathlib import Path
@@ -25,37 +25,32 @@ def create_application(
 def create_configured_application(
     database_path: str | Path | None = None, *, seed_asset: Path | None = None,
 ) -> ApplicationPort:
-    """Main's integrated runtime; explicit operator opt-in before reading model settings.
+    """Initialize known reviewer data and compose the unchanged Core/Main services.
 
-    The original low-level factory stays unchanged. With no opt-in the installed
-    Core is wired but has no client: impacted runs fail PROVIDER_UNAVAILABLE with
-    zero model calls. No-impact runs still finish deterministically. This factory
-    never initializes data, loads .env, calls a model or selects another provider.
+    Only the independent review configuration can enable the single real adapter.
+    No model is called here and no original .env or TOTP state is accessed.
     """
     from campusops.agent_core import CoreSettings, GearShiftOrchestrator, LLMAdapter
 
+    from campusops.reviewer import get_context, initialize_data, configure_environment
+    context = get_context()
+    if database_path is not None and Path(database_path).absolute() != context.database:
+        raise ValueError("Reviewer database destination mismatch")
+    if seed_asset is not None and Path(seed_asset).absolute() != context.seed:
+        raise ValueError("Reviewer seed destination mismatch")
+    initialize_data(context)
+    configure_environment(context)
     settings = CoreSettings.from_env()
     client = None
     if os.environ.get("CAMPUSOPS_LLM_ENABLED", "false").lower() == "true":
-        budget_context = os.environ.get("CAMPUSOPS_BUDGET_PROJECT_ROOT")
-        if budget_context:
-            # Reuse the existing validated authority when a package is moved for
-            # acceptance. Core's D-drive/project/directory guards remain intact.
-            # The flag cannot enable a model or authorize a fee by itself.
-            from campusops.agent_core.budget import BudgetLedger
-            from campusops.agent_core.config import ModelSettings
-            from campusops.agent_core.errors import CoreFailure
-            from campusops.contracts.models import ErrorCode
-            ledger = BudgetLedger(project_root=Path(budget_context))
-            if not (ledger.directory / "usage.jsonl").is_file():
-                raise CoreFailure(ErrorCode.INVALID_STATE, "EXISTING_BUDGET_AUTHORITY_REQUIRED")
-            client = LLMAdapter(ModelSettings.from_env(), budget=ledger)
-        else:
-            client = LLMAdapter.from_env()
+        from campusops.agent_core.budget import BudgetLedger
+        from campusops.agent_core.config import ModelSettings
+        client = LLMAdapter(ModelSettings.from_env(), budget=BudgetLedger(
+            directory=context.budget, project_root=context.root))
     return create_application(
-        database_path, orchestration=GearShiftOrchestrator(settings), model_client=client,
+        context.database, orchestration=GearShiftOrchestrator(settings), model_client=client,
         execution_mode=ExecutionMode.REAL_API,
         provider="openai_compatible" if client is not None else None,
         model_id=client.settings.model_id if client is not None else None,
-        seed_asset=seed_asset,
+        seed_asset=context.seed,
     )

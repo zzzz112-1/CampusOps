@@ -58,3 +58,7 @@ worktrees; that does not authorize editing another checkout.
   `bootstrap.create_configured_application()`. The original `create_application()`
   remains the explicit-injection contract. A missing opt-in/client is a controlled
   unavailable-provider result, never a production mock fallback.
+
+## Independent reviewer branch scope
+
+This branch is RC15-Review-1 (0.2.0rc15.post1), explicitly authorized by the owner. Its normal entries use isolated reviewer data without personal TOTP. Original locked Main/runtime/history remain unchanged. Do not add a runtime authentication-disable flag to the original app. Business contracts, approval, quotas and deterministic validation stay frozen. No cloud model requests during development.
