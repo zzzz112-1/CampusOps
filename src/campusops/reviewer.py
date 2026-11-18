@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import sys
 import threading
 from uuid import uuid4
 
@@ -17,8 +18,9 @@ _initialization_lock = threading.RLock()
 
 
 def _stop():
+    location = "请核对当前项目中的评审文件。" if sys.platform == "linux" else "请使用完整新解压目录。"
     raise CampusOpsError(ErrorCode.INVALID_STATE,
-        "评审数据目录、来源标记或文件状态无法确认，已停止并保留原件。请使用完整新解压目录。")
+        "评审数据目录、来源标记或文件状态无法确认，已停止并保留原件。" + location)
 
 
 def _plain_path(path):
@@ -61,13 +63,20 @@ class ReviewerContext:
 
     def require(self, *, activity=False):
         # Activity is only an existing UI callback signature, not session expiry.
-        if (not self.root.is_absolute() or self.root.drive.casefold() != "d:"
-                or self.root == Path("D:/CampusOps") or self.root != self.root.resolve()):
-            _stop()
-        for path in (self.root, self.directory, self.database, self.budget, self.seed):
-            _plain_path(path)
         try:
-            marker = json.loads((self.root / "reviewer-build.json").read_text(encoding="utf-8"))
+            if not self.root.is_absolute() or self.root != self.root.resolve():
+                _stop()
+            if sys.platform == "linux":
+                if not self.root.is_relative_to(project_root()):
+                    _stop()
+            elif self.root.drive.casefold() != "d:" or self.root == Path("D:/CampusOps"):
+                _stop()
+            build_marker = self.root / "reviewer-build.json"
+            instance_marker = self.directory / "instance.json"
+            for path in (self.root, self.directory, self.database, self.budget, self.seed,
+                         build_marker, instance_marker):
+                _plain_path(path)
+            marker = json.loads(build_marker.read_text(encoding="utf-8"))
             if marker != {"application": REVIEW_APP, "label": REVIEW_LABEL,
                           "version": "0.2.0rc15.post1", "seed_sha256": sha256(self.seed.read_bytes()).hexdigest()}:
                 _stop()
@@ -82,7 +91,7 @@ class ReviewerContext:
                 if directory.exists():
                     for item in directory.iterdir():
                         _plain_path(item)
-        except (OSError, ValueError, TypeError):
+        except (OSError, ValueError, TypeError, RuntimeError):
             _stop()
 
 

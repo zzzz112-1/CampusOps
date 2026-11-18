@@ -60,6 +60,17 @@ py -3.12 -m venv .venv
 
 也支持 `python -m streamlit run streamlit_app.py --server.address 127.0.0.1` 和 `python -m streamlit run src/campusops/ui/app.py --server.address 127.0.0.1`，首次数据初始化由评审入口完成，不需先运行旧版CLI。`python -m campusops.cli status`、init-db与seed-demo也只操作本目录的已知评审数据；--db不能指向原版或其他路径。
 
+### Linux 云端源码运行
+
+在 Linux 兼容分支的项目根目录，用 Python 3.12 和 `requirements.lock.txt` 准备 `.venv`，再启动回环服务。
+
+```bash
+CAMPUSOPS_LLM_ENABLED=false CAMPUSOPS_REVIEW_LLM_ENABLED=false \
+  .venv/bin/python scripts/reviewer_server.py --no-browser --port 8501
+```
+
+规则从当前源码项目内读取。评审入口仍使用项目内的 `var/reviewer/data/review.db`，首次导入虚构数据，之后按实例标记验证并保留预约历史。路径和种子归属校验失败时，服务会停止。
+
 定向离线测试：`python -m pytest -q tests/integration/test_reviewer_entry.py`。Windows Streamlit测试需要本机回环通信；所有外部网络在测试中禁止。正式运行不自动注入离线模型替身。
 
 可选重建便携包使用 `scripts/build_reviewer_package.py --runtime-zip <已封存RC15日常包>`，脚本校验其固定哈希并复用第三方运行时，仅替换评审版第一方wheel，不下载依赖。

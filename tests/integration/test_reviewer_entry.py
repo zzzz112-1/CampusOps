@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import socket
+from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -14,6 +15,7 @@ from campusops.bootstrap import create_application
 from campusops.contracts.errors import CampusOpsError
 from campusops.contracts.models import (EquipmentCreate, ExecutionMode, IncidentCreate,
     ReservationCancelCreate, ReservationCreate)
+from campusops.domain.rules import DEFAULT_RULES, load_booking_rules
 from campusops.reviewer import get_context, initialize_data, configure_environment
 from campusops.security.service import protect_service
 from .test_integrated_runtime import OfflineModelClient
@@ -52,9 +54,54 @@ def reservation_request(service, **patch):
         actor_alias="评审员", note="虚构评审测试", idempotency_key="review-create"), **patch})
 
 
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux project path rules")
+def test_linux_catalog_rejects_paths_outside_project_and_linked_files(tmp_path):
+    catalog = tmp_path / "rules.json"
+    shutil.copyfile(DEFAULT_RULES, catalog)
+    assert load_booking_rules(catalog).fingerprint == load_booking_rules().fingerprint
+
+    with TemporaryDirectory(dir="/tmp") as directory:
+        outside = Path(directory) / "rules.json"
+        shutil.copyfile(DEFAULT_RULES, outside)
+        symlink = tmp_path / "linked-rules.json"
+        symlink.symlink_to(outside)
+        for path in (outside, symlink):
+            with pytest.raises(CampusOpsError, match="RULE_CATALOG_OUTSIDE_PROJECT"):
+                load_booking_rules(path)
+
+    (tmp_path / "hardlinked-rules.json").hardlink_to(catalog)
+    with pytest.raises(CampusOpsError, match="RULE_CATALOG_INVALID_OR_UNAVAILABLE"):
+        load_booking_rules(catalog)
+
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux project path rules")
+def test_linux_reviewer_rejects_a_valid_layout_outside_project(review_context):
+    with TemporaryDirectory(dir="/tmp") as directory:
+        outside = Path(directory) / "review-copy"
+        shutil.copytree(review_context.root, outside)
+        with pytest.raises(CampusOpsError):
+            get_context(outside)
+        assert not (outside / "var").exists()
+
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux reviewer path rules")
+@pytest.mark.parametrize("relative_path", [
+    "reviewer-build.json", "var/reviewer", "var/reviewer/instance.json",
+])
+def test_linux_reviewer_rejects_linked_data_and_markers(review_context, relative_path):
+    initialize_data(review_context)
+    path = review_context.root / relative_path
+    original = path.with_name(path.name + "-original")
+    path.rename(original)
+    path.symlink_to(original, target_is_directory=original.is_dir())
+    with pytest.raises(CampusOpsError):
+        initialize_data(review_context)
+
+
 def test_first_init_and_second_start_preserve_data(review_context):
     service = normal_service(review_context)
     assert len(service.list_equipment()) == 10 and len(service.list_reservations()) == 20
+    assert len(service.list_agent_configs()) == 3
     created = service.create_reservation(reservation_request(service)).reservation
     before = service.list_reservations()
     restarted = normal_service(review_context)

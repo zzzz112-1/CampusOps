@@ -3,6 +3,8 @@
 from hashlib import sha256
 import json
 from pathlib import Path
+from stat import S_ISREG
+import sys
 
 from pydantic import ValidationError
 
@@ -22,11 +24,22 @@ def _unique_object(pairs):
 
 
 def load_booking_rules(path: Path | None = None) -> BookingRuleCatalog:
-    source = Path(path or DEFAULT_RULES).resolve()
-    if source.drive.upper() != "D:":
-        raise CampusOpsError(ErrorCode.INVALID_STATE, "RULE_CATALOG_REQUIRES_D_DRIVE")
     try:
-        if source.stat().st_size > 65536:
+        requested = Path(path or DEFAULT_RULES).absolute()
+        source = requested.resolve()
+        linux = sys.platform == "linux"
+        if linux:
+            source_directory = Path(__file__).absolute().parents[2]
+            if source_directory.name != "src" or not source.is_relative_to(source_directory.parent):
+                raise CampusOpsError(ErrorCode.INVALID_STATE, "RULE_CATALOG_OUTSIDE_PROJECT")
+            if requested != source:
+                raise ValueError("catalog path is not canonical")
+        elif source.drive.upper() != "D:":
+            raise CampusOpsError(ErrorCode.INVALID_STATE, "RULE_CATALOG_REQUIRES_D_DRIVE")
+        details = source.stat()
+        if linux and (not S_ISREG(details.st_mode) or details.st_nlink != 1):
+            raise ValueError("catalog must be a regular file without additional links")
+        if details.st_size > 65536:
             raise ValueError("catalog too large")
         raw = json.loads(source.read_text(encoding="utf-8"), object_pairs_hook=_unique_object)
         if not isinstance(raw, dict) or set(raw) != {"ruleset_id", "version", "source", "fictional", "rules"}:
@@ -37,5 +50,5 @@ def load_booking_rules(path: Path | None = None) -> BookingRuleCatalog:
         fingerprint = sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True,
                                         separators=(",", ":")).encode("utf-8")).hexdigest()
         return provisional.model_copy(update={"fingerprint": fingerprint})
-    except (OSError, UnicodeError, ValueError, ValidationError):
+    except (OSError, UnicodeError, ValueError, ValidationError, RuntimeError):
         raise CampusOpsError(ErrorCode.INVALID_STATE, "RULE_CATALOG_INVALID_OR_UNAVAILABLE") from None
