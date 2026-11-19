@@ -135,7 +135,7 @@
     "tests/core/__init__.py": "cb2563d2ecbeba0c7e09997a5a26deac14aa8efede675af1c9e86517bf01ca8d",
     "tests/core/conftest.py": "27b79f8552df052f17539c890fdc8189eb9b1c786676cf0422735ea2c939ad2a",
     "tests/core/support.py": "3f14cdc0733aa4fc587e6f788b535ab73d1b7a0c2a53aa05a1f855fb4c29f0ed",
-    "tests/core/test_budget_llm.py": "8b225b31e120e66771a8eff6ff0eb8a4eef4d4dd21df1e5de6bf629343c09ab7",
+    "tests/core/test_budget_llm.py": "9edf1a05f59958a05f2426c8cfb6e87c25ce0d8f9f500282bb9cbea673508e1c",
     "tests/core/test_budget_package_scope.py": "81e2f99a9d4e1f20fa32df47a54fff68f457d5ea20c4fe3a6e625c2bd096b32d",
     "tests/core/test_budget_snapshot.py": "d60a8096da424fae06ce9cb6f8da7c978d96ef4622987ee617175db304dbc6f8",
     "tests/core/test_input_limits.py": "83565eef335cbb2a466001d9ec2409401f1bc70383ec36dda77198f8d34c0d59",

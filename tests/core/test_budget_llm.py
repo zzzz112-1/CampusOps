@@ -180,6 +180,7 @@ def install_local_transport(monkeypatch, handler):
             provided.close()
         return RealSDK(**kwargs, http_client=httpx.Client(transport=httpx.MockTransport(handler), trust_env=False,
                                                          event_hooks=hooks))
+    monkeypatch.setattr(llm_module, "DefaultHttpxClient", lambda **kwargs: httpx.Client(trust_env=False, **kwargs))
     monkeypatch.setattr(llm_module, "OpenAI", factory)
     return options
 
