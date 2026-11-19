@@ -1,5 +1,4 @@
-"""RC15-Review-1 only. Real entry tests never inject an authenticated object."""
-from hashlib import sha256
+"""Exercises the demo application and its explicit model configuration."""
 import json
 import os
 from pathlib import Path
@@ -14,7 +13,7 @@ from campusops.bootstrap import create_application
 from campusops.contracts.errors import CampusOpsError
 from campusops.contracts.models import (EquipmentCreate, ExecutionMode, IncidentCreate,
     ReservationCancelCreate, ReservationCreate)
-from campusops.reviewer import get_context, initialize_data, configure_environment
+from campusops.reviewer import initialize_data, configure_environment
 from campusops.security.service import protect_service
 from .test_integrated_runtime import OfflineModelClient
 from campusops.agent_core import CoreSettings, GearShiftOrchestrator
@@ -22,17 +21,6 @@ from campusops.agent_core import CoreSettings, GearShiftOrchestrator
 ROOT = Path(__file__).resolve().parents[2]
 _socket_connect = socket.socket.connect
 _socket_connect_ex = socket.socket.connect_ex
-
-
-@pytest.fixture
-def review_context(tmp_path):
-    root = tmp_path / "review-copy"
-    root.mkdir()
-    for name in ("reviewer-build.json", "pyproject.toml", "AGENTS.md", "assets/demo_seed.json", "docs/project-spec-v2.md"):
-        target = root / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(ROOT / name, target)
-    return get_context(root)
 
 
 def normal_service(context, client=None):
@@ -161,7 +149,11 @@ def test_change_before_approval_invalidates_proposal(review_context):
 
 def test_cli_actual_new_source_copy_no_owner_or_env(review_context):
     shutil.copytree(ROOT / "src", review_context.root / "src", ignore=shutil.ignore_patterns("__pycache__", "*.egg-info"))
-    env = dict(os.environ, PYTHONPATH=str(review_context.root / "src"), CAMPUSOPS_REVIEW_LLM_ENABLED="false")
+    # Keep the copied source first while retaining runner-supplied dependency paths.
+    search_paths = [str(review_context.root / "src")]
+    if os.environ.get("PYTHONPATH"):
+        search_paths.append(os.environ["PYTHONPATH"])
+    env = dict(os.environ, PYTHONPATH=os.pathsep.join(search_paths), CAMPUSOPS_REVIEW_LLM_ENABLED="false")
     for command in ("init-db", "seed-demo", "status"):
         result = subprocess.run([sys.executable, "-m", "campusops.cli", command],
             cwd=review_context.root, env=env, capture_output=True, text=True, timeout=30)
@@ -171,7 +163,7 @@ def test_cli_actual_new_source_copy_no_owner_or_env(review_context):
     assert not (review_context.root / "maintenance").exists()
 
 
-def test_actual_streamlit_entry_navigation_refresh_and_new_window(monkeypatch):
+def test_actual_streamlit_entry_navigation_refresh_and_new_window(configured_context, monkeypatch):
     from streamlit.testing.v1 import AppTest
     # Windows asyncio uses a real loopback socketpair even for in-process AppTest.
     # Permit that local mechanism while continuing to reject every external host.
@@ -190,7 +182,7 @@ def test_actual_streamlit_entry_navigation_refresh_and_new_window(monkeypatch):
     # Real require_ui_access and real bootstrap run without any auth injection.
     app = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=40).run()
     assert not app.exception
-    assert any("无锁评审版" in row.value for row in app.title)
+    assert any(row.value == "CampusOps" for row in app.title)
     assert not any("验证码" in row.label for row in app.text_input)
     for page in ("异常调度与审批", "处理记录与设置", "资源与预约"):
         app.radio(key="ui_page").set_value(page).run()
@@ -200,10 +192,10 @@ def test_actual_streamlit_entry_navigation_refresh_and_new_window(monkeypatch):
     app.button(key="reviewer_clear_operation").click().run()
     assert not app.exception
     second = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=40).run()
-    assert not second.exception and any("无锁评审版" in row.value for row in second.title)
+    assert not second.exception and any(row.value == "CampusOps" for row in second.title)
 
 
-def test_explicit_model_composition_uses_independent_budget(monkeypatch):
+def test_explicit_model_composition_uses_independent_budget(configured_context, monkeypatch):
     from campusops.bootstrap import create_configured_application
     for name, value in {"CAMPUSOPS_REVIEW_LLM_ENABLED": "true",
         "CAMPUSOPS_REVIEW_MODEL_API_KEY": "fictional-review-composition-only",
@@ -211,6 +203,6 @@ def test_explicit_model_composition_uses_independent_budget(monkeypatch):
         "CAMPUSOPS_REVIEW_MODEL_ID": "fictional-review-model"}.items():
         monkeypatch.setenv(name, value)
     service = create_configured_application()
-    assert service._model_client.budget.directory == get_context().budget
+    assert service._model_client.budget.directory == configured_context.budget
     assert service._model_client.settings.limits.calls_per_run == 6
-    assert not (get_context().budget / "usage.jsonl").exists()
+    assert not (configured_context.budget / "usage.jsonl").exists()

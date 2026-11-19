@@ -1,4 +1,4 @@
-"""Launch the review package on loopback; no .env, Owner tool or TOTP access."""
+"""Launch the CampusOps demo on the local loopback address."""
 import argparse
 from pathlib import Path
 import socket
@@ -39,9 +39,14 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.port != 0 and not 1024 <= args.port <= 65535:
         parser.error("port must be 0 or between 1024 and 65535")
-    from campusops.reviewer import get_context, initialize_data, configure_environment
-    context = get_context()
-    initialize_data(context)
+    from campusops.contracts.errors import CampusOpsError
+    from campusops.reviewer import get_context, start_reviewer_runtime, configure_environment
+    try:
+        context = get_context()
+        start_reviewer_runtime(context)
+    except CampusOpsError as error:
+        print(error.error.message, file=sys.stderr)
+        return 2
     configure_environment(context)
     sys.dont_write_bytecode = True
     sys.pycache_prefix = str(context.directory / "cache/python")
@@ -61,7 +66,7 @@ def main(argv=None):
                 "--server.headless", "true", "--server.fileWatcherType", "none",
                 "--server.enableCORS", "true", "--server.enableXsrfProtection", "true",
                 "--browser.gatherUsageStats", "false", "--client.toolbarMode", "minimal"]
-    print(f"CampusOps RC15-Review-1: http://127.0.0.1:{port}", flush=True)
+    print(f"CampusOps: http://127.0.0.1:{port}", flush=True)
     return streamlit_main() or 0
 
 
@@ -69,5 +74,5 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception:
-        print("评审服务未能启动。请确认已完整解压到D盘的新目录、文件未被系统策略阻止，且端口可用。", file=sys.stderr)
+        print("CampusOps 未能启动。请确认已完整解压到D盘的新目录、文件未被系统策略阻止，且端口可用。", file=sys.stderr)
         raise SystemExit(2) from None

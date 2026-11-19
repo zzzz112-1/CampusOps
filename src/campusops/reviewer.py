@@ -1,4 +1,4 @@
-"""RC15-Review-1: no identity gate; isolated fictional data and model settings."""
+"""CampusOps demo data and model settings."""
 from dataclasses import dataclass
 from hashlib import sha256
 import json
@@ -14,6 +14,7 @@ from campusops.contracts.models import ErrorCode
 REVIEW_LABEL = "RC15-Review-1"
 REVIEW_APP = "campusops-review-unlocked"
 _initialization_lock = threading.RLock()
+_runtime_files = {}
 
 
 def _stop():
@@ -147,6 +148,42 @@ def initialize_data(context):
         return context
 
 
+def start_reviewer_runtime(context):
+    """Start a workbench once per process, holding its data lock until process exit."""
+    from campusops.services.application import ApplicationService
+    from campusops.storage.database import Database
+
+    with _initialization_lock:
+        if context.root in _runtime_files:
+            return
+        initialize_data(context)
+        lock_path = context.database.parent / "workbench.lock"
+        _plain_path(lock_path)
+        lock_file = lock_path.open("a+b")
+        try:
+            try:
+                if os.name == "nt":
+                    import msvcrt
+                    # The Windows lock covers the first byte. Initialize it only
+                    # when empty; competing processes lock the same byte.
+                    if lock_file.tell() == 0:
+                        lock_file.write(b"\0")
+                        lock_file.flush()
+                    lock_file.seek(0)
+                    msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError as exc:
+                raise CampusOpsError(ErrorCode.INVALID_STATE,
+                    "无法取得当前演示目录的运行锁。请先关闭此目录中正在运行的 CampusOps，再重新启动。") from exc
+            ApplicationService(Database(context.database)).recover_interrupted_plans()
+        except BaseException:
+            lock_file.close()
+            raise
+        _runtime_files[context.root] = lock_file
+
+
 def configure_environment(context):
     """Old application variables are ignored; only REVIEW model opt-in applies."""
     context.require()
@@ -186,7 +223,7 @@ def run_ui():
     if context is None:
         return
     try:
-        initialize_data(context)
+        start_reviewer_runtime(context)
         service = create_configured_application()
     except CampusOpsError as exc:
         _show_error(exc.error)

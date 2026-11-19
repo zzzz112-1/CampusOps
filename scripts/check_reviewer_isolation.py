@@ -51,7 +51,7 @@ def main():
         checks = {"original_locked_negative_control": "Passed", "identity_fixture": "Isolated missing state, no grant"}
     else:
         app = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=30).run()
-        assert not app.exception and any("无锁评审版" in item.value for item in app.title)
+        assert not app.exception and any(item.value == "CampusOps" for item in app.title)
         for page in ("异常调度与审批", "处理记录与设置", "资源与预约"):
             app.radio(key="ui_page").set_value(page).run()
             assert not app.exception

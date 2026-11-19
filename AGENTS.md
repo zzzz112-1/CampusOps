@@ -59,6 +59,6 @@ worktrees; that does not authorize editing another checkout.
   remains the explicit-injection contract. A missing opt-in/client is a controlled
   unavailable-provider result, never a production mock fallback.
 
-## Independent reviewer branch scope
+## Demonstration branch constraints
 
-This branch is RC15-Review-1 (0.2.0rc15.post1), explicitly authorized by the owner. Its normal entries use isolated reviewer data without personal TOTP. Original locked Main/runtime/history remain unchanged. Do not add a runtime authentication-disable flag to the original app. Business contracts, approval, quotas and deterministic validation stay frozen. No cloud model requests during development.
+The CampusOps demonstration uses isolated fictional data. Main application security and private operating data are outside this branch. Keep the approval contract, request budgets and deterministic validation intact. Run development checks with offline fixtures and explicit model opt-in.

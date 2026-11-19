@@ -16,7 +16,7 @@ from campusops.services.approval import ApprovalService
 from campusops.services.maintenance import EquipmentMaintenanceService
 from campusops.services.catalog import EquipmentCatalogService
 from campusops.storage.catalog import archived_ids
-from campusops.services.readonly import ReadonlyTools
+from campusops.services.readonly import ACTIVE_STEP_STATUSES, ReadonlyTools
 from campusops.storage import repository as repo
 from campusops.storage.database import Database
 from campusops.storage.seed import seed_demo
@@ -194,6 +194,39 @@ class ApplicationService:
             validation=validation or ValidationResult(passed=False, issues=(message,)),
             explanation=message, error=ServiceError(code=code, message=message),
         )
+
+    def recover_interrupted_plans(self) -> None:
+        """Close incomplete planning records while the workbench exclusively owns its data directory."""
+        from campusops.services.reservation_changes import failed as failed_change
+        from campusops.storage import reservation_events as events
+
+        active = {RunStatus.CREATED} | ACTIVE_STEP_STATUSES
+        placeholders = ",".join("?" for _ in active)
+        message = "上次规划在工作台关闭时中断，未修改预约。核对原记录后，可手动发起新的规划。"
+        with self._database.transaction() as connection:
+            finished_at = repo.timestamp()
+            interrupted = connection.execute(
+                f"SELECT id,incident_id,status FROM workflow_runs WHERE status IN ({placeholders}) "
+                "AND result_json IS NULL AND finished_at_utc IS NULL "
+                "AND NOT EXISTS (SELECT 1 FROM proposals WHERE proposals.run_id=workflow_runs.id)",
+                tuple(sorted(active)),
+            ).fetchall()
+            for row in interrupted:
+                result = self._failed(row["id"], row["incident_id"], ErrorCode.WORKFLOW_FAILED, message)
+                connection.execute(
+                    "UPDATE workflow_runs SET status=?,result_json=?,error_json=?,finished_at_utc=? WHERE id=?",
+                    (RunStatus.FAILED, result.model_dump_json(), result.error.model_dump_json(), finished_at, row["id"]),
+                )
+                repo.audit(connection, "WORKFLOW_INTERRUPTED", "run", row["id"], {"status": row["status"]},
+                           {"status": RunStatus.FAILED, "error_code": result.error.code})
+            for run in events.list_changes(connection):
+                if run.status not in active or run.result is not None or run.finished_at is not None:
+                    continue
+                result = failed_change(run.id, ErrorCode.WORKFLOW_FAILED, message)
+                events.change_event(connection, run.id, "RESERVATION_CHANGE_RESULT", {
+                    "result": result.model_dump(mode="json"), "status": RunStatus.FAILED,
+                    "at": finished_at, "recovery": "service_restart",
+                })
 
     def start_workflow(self, incident_id: str) -> PlanResult:
         return self._start_workflow(incident_id)

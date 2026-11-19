@@ -4,7 +4,7 @@ from campusops.contracts.errors import CampusOpsError
 from campusops.reviewer import ReviewerContext, get_context
 
 def require_ui_access() -> ReviewerContext | None:
-    st.set_page_config(page_title="CampusOps · 无锁评审版", page_icon="🎒", layout="wide",
+    st.set_page_config(page_title="CampusOps", page_icon="🎒", layout="wide",
                        initial_sidebar_state="collapsed")
     try:
         return get_context()

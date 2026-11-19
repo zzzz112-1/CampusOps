@@ -1,0 +1,161 @@
+name: Windows portable smoke check
+
+on:
+  push:
+    branches: [campusops-submission-rev20]
+
+permissions:
+  contents: read
+
+jobs:
+  portable:
+    runs-on: windows-2025
+    timeout-minutes: 12
+    env:
+      CAMPUSOPS_REVIEW_LLM_ENABLED: "false"
+    steps:
+      - name: Check out the published source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Recreate the portable program from the public runtime and tracked sources
+        id: portable
+        shell: pwsh
+        run: |
+          $ProgressPreference = 'SilentlyContinue'
+          $base = Join-Path $env:RUNNER_TEMP 'campusops-base.zip'
+          $release = Invoke-RestMethod -Uri 'https://api.github.com/repos/zzzz112-1/CampusOps/releases/tags/RC15-Review-1'
+          $asset = @($release.assets | Where-Object { $_.name -eq 'CampusOps_Review_Unlocked_RC15_Review1.zip' })
+          if ($asset.Count -ne 1) { throw 'The pinned public Windows runtime asset was not found.' }
+          Invoke-WebRequest -Uri $asset[0].browser_download_url -OutFile $base
+          $baseHash = '89c6c722e39543862a52d92baaf68cc63fa2b74ff0768a6ab5db97dbdbc0ce97'
+          if ((Get-FileHash -LiteralPath $base -Algorithm SHA256).Hash -ine $baseHash) {
+            throw 'The public Windows runtime archive did not match its pinned SHA-256.'
+          }
+
+          if (!(Test-Path -LiteralPath 'D:\')) {
+            $drive = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'campusops-drive')
+            & subst.exe D: $drive.FullName
+            if ($LASTEXITCODE -ne 0 -or !(Test-Path -LiteralPath 'D:\')) {
+              throw 'An isolated D: test drive could not be created.'
+            }
+            Write-Host 'Using a temporary D: drive mapping on Windows Server.'
+          }
+          $parent = New-Item -ItemType Directory -Path ('D:\CampusOps-CI-' + $env:GITHUB_RUN_ID + '-' + $env:GITHUB_RUN_ATTEMPT)
+          Expand-Archive -LiteralPath $base -DestinationPath $parent.FullName
+          $unpacked = @(Get-ChildItem -LiteralPath $parent.FullName -Directory | Where-Object {
+            Test-Path -LiteralPath (Join-Path $_.FullName 'runtime\python.exe') -PathType Leaf
+          })
+          if ($unpacked.Count -ne 1) { throw 'The expanded runtime did not have one program directory.' }
+          $program = Join-Path $parent.FullName 'CampusOps'
+          if ($unpacked[0].FullName -ne $program) { Move-Item -LiteralPath $unpacked[0].FullName -Destination $program }
+
+          $sources = @(git ls-files -- src/campusops | Where-Object { $_ -match '\.(py|sql|json)$' })
+          if ($LASTEXITCODE -ne 0 -or $sources.Count -lt 60) { throw 'The tracked runtime source set is incomplete.' }
+          foreach ($source in $sources) {
+            $target = Join-Path (Join-Path $program 'runtime\Lib\site-packages') $source.Substring(4)
+            New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
+            Copy-Item -LiteralPath $source -Destination $target -Force
+          }
+          foreach ($entry in @('scripts/reviewer_server.py', 'streamlit_app.py')) {
+            Copy-Item -LiteralPath $entry -Destination (Join-Path $program $entry) -Force
+          }
+          $starters = @(Get-ChildItem -LiteralPath $program -File -Filter '*.cmd')
+          if ($starters.Count -ne 1) { throw 'Expected exactly one CMD starter.' }
+          if ($starters[0].Name -ne '启动CampusOps.cmd') {
+            Rename-Item -LiteralPath $starters[0].FullName -NewName '启动CampusOps.cmd'
+          }
+          "root=$program" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Launch the CMD, verify the database and load the app in Edge
+        shell: pwsh
+        env:
+          PROGRAM_ROOT: ${{ steps.portable.outputs.root }}
+        run: |
+          $program = $env:PROGRAM_ROOT
+          $runtime = Join-Path $program 'runtime\python.exe'
+          $output = Join-Path $env:RUNNER_TEMP 'campusops.stdout'
+          $errors = Join-Path $env:RUNNER_TEMP 'campusops.stderr'
+          $server = Start-Process cmd.exe -ArgumentList @('/d', '/c', '启动CampusOps.cmd') `
+            -WorkingDirectory $program -RedirectStandardOutput $output -RedirectStandardError $errors -PassThru
+          $driver = $null
+          $session = $null
+          try {
+            $origin = $null
+            for ($attempt = 0; $attempt -lt 60; $attempt++) {
+              $server.Refresh()
+              if ($server.HasExited) { throw 'The portable CMD exited during startup.' }
+              $log = Get-Content -LiteralPath $output -Raw -ErrorAction SilentlyContinue
+              if ($log -match 'https?://127\.0\.0\.1:\d+') {
+                $origin = $Matches[0]
+                try {
+                  $health = Invoke-WebRequest -Uri "$origin/_stcore/health" -NoProxy -TimeoutSec 3
+                  if ($health.StatusCode -eq 200 -and $health.Content.Trim() -eq 'ok') { break }
+                } catch {
+                  $health = $null
+                }
+              }
+              Start-Sleep -Milliseconds 500
+            }
+            if (!$health -or $health.StatusCode -ne 200) { throw 'The CMD did not expose a healthy loopback service.' }
+            Write-Host 'Windows CMD and embedded Python started the loopback service.'
+
+            $db = Join-Path $program 'var\reviewer\data\review.db'
+            $verifyDb = @'
+          import sqlite3
+          import sys
+          from pathlib import Path
+          path = Path(sys.argv[1])
+          assert path.is_file()
+          with sqlite3.connect(path.as_uri() + "?mode=ro", uri=True) as db:
+              assert db.execute("pragma integrity_check").fetchone() == ("ok",)
+              assert tuple(db.execute("select count(*) from equipment").fetchone()) == (10,)
+              assert tuple(db.execute("select count(*) from reservations").fetchone()) == (20,)
+          '@
+            & $runtime -I -c $verifyDb $db
+            if ($LASTEXITCODE -ne 0) { throw 'The bundled Python and initial SQLite data did not pass validation.' }
+            Write-Host 'The portable instance initialized 10 equipment items and 20 reservations.'
+
+            $edgeDriver = Join-Path $env:EDGEWEBDRIVER 'msedgedriver.exe'
+            if (!(Test-Path -LiteralPath $edgeDriver -PathType Leaf)) { throw 'The runner EdgeDriver is unavailable.' }
+            $listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, 0)
+            $listener.Start()
+            $driverPort = $listener.LocalEndpoint.Port
+            $listener.Stop()
+            $driver = Start-Process $edgeDriver -ArgumentList "--port=$driverPort" -PassThru
+            $wd = "http://127.0.0.1:$driverPort"
+            $driverReady = $false
+            for ($attempt = 0; $attempt -lt 20; $attempt++) {
+              try {
+                $driverReady = (Invoke-RestMethod -Uri "$wd/status" -NoProxy -TimeoutSec 2).value.ready
+                if ($driverReady) { break }
+              } catch {
+                $driverReady = $false
+              }
+              Start-Sleep -Milliseconds 500
+            }
+            if (!$driverReady) { throw 'The Windows Edge driver did not become ready.' }
+            $options = @{capabilities = @{alwaysMatch = @{
+              browserName = 'MicrosoftEdge'
+              'ms:edgeOptions' = @{args = @('--headless=new', '--no-first-run', '--disable-background-networking')}
+            }}}
+            $session = (Invoke-RestMethod -Method Post -Uri "$wd/session" -NoProxy -TimeoutSec 15 `
+              -ContentType 'application/json' -Body ($options | ConvertTo-Json -Depth 8)).value.sessionId
+            if (!$session) { throw 'The Windows Edge session was unavailable.' }
+            Invoke-RestMethod -Method Post -Uri "$wd/session/$session/url" -NoProxy -TimeoutSec 15 `
+              -ContentType 'application/json' -Body (@{url = $origin} | ConvertTo-Json) | Out-Null
+            $visible = $false
+            for ($attempt = 0; $attempt -lt 30; $attempt++) {
+              $page = (Invoke-RestMethod -Uri "$wd/session/$session/source" -NoProxy -TimeoutSec 3).value
+              if ($page -match 'CampusOps' -and $page -match '资源与预约') { $visible = $true; break }
+              Start-Sleep -Milliseconds 500
+            }
+            if (!$visible) { throw 'Microsoft Edge did not render the CampusOps workbench.' }
+            Write-Host 'Microsoft Edge rendered the Workbench on Windows Server.'
+          } finally {
+            if ($session) {
+              try { Invoke-RestMethod -Method Delete -Uri "$wd/session/$session" -NoProxy -TimeoutSec 3 | Out-Null } catch {}
+            }
+            if ($driver) { Stop-Process -Id $driver.Id -Force -ErrorAction SilentlyContinue }
+            if ($server -and !$server.HasExited) { & taskkill.exe /PID $server.Id /T /F *> $null }
+          }

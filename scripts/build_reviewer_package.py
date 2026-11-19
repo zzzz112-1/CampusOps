@@ -22,7 +22,7 @@ def build(runtime_zip):
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     assert not subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT).strip(), "Commit reviewer source before building"
     out = ROOT / "var/releases" / ("RC15-Review-1-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:6])
-    package = out / "CampusOps-Review"
+    package = out / "CampusOps"
     package.mkdir(parents=True)
     with zipfile.ZipFile(runtime_zip) as old:
         for item in old.infolist():
@@ -58,7 +58,7 @@ def build(runtime_zip):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes((ROOT / name).read_bytes())
     command = '@echo off\r\nsetlocal\r\nchcp 65001 >nul\r\ncd /d "%~dp0"\r\n"%~dp0runtime\\python.exe" -I "%~dp0scripts\\reviewer_server.py"\r\nif errorlevel 1 pause\r\n'
-    (package / "启动CampusOps评审版.cmd").write_bytes(command.encode("utf-8"))
+    (package / "启动CampusOps.cmd").write_bytes(command.encode("utf-8"))
     first_party = {}
     for path in sorted((ROOT / "src/campusops").rglob("*")):
         if path.is_file() and path.suffix in (".py", ".sql", ".json"):
@@ -73,7 +73,7 @@ def build(runtime_zip):
                 "files_excluding_manifest": files, "totp_required": False, "owner_tool_included": False,
                 "real_model_default": False, "business_data_included": False}
     (package / "Review_Build_Manifest.json").write_bytes((json.dumps(manifest, ensure_ascii=False, indent=2) + "\n").encode())
-    archive = out / "CampusOps_Review_Unlocked_RC15_Review1.zip"
+    archive = out / "CampusOps_演示程序_Windows.zip"
     with zipfile.ZipFile(archive, "x", zipfile.ZIP_DEFLATED, compresslevel=6) as target:
         for path in sorted(package.rglob("*")):
             if path.is_file():

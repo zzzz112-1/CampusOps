@@ -17,7 +17,9 @@ def pytest_addoption(parser):
 def pytest_configure(config):
     config.addinivalue_line("markers", "real_api: separately authorized real network/model acceptance")
     if config.option.basetemp is None:
-        config.option.basetemp = str(ROOT / ".tmp" / ("pytest-" + uuid4().hex))
+        scratch = ROOT / ".tmp"
+        scratch.mkdir(exist_ok=True)
+        config.option.basetemp = str(scratch / ("pytest-" + uuid4().hex))
 
 
 def pytest_collection_modifyitems(config, items):
@@ -34,21 +36,6 @@ def offline_by_default(request, monkeypatch):
             raise AssertionError("Network/model calls are forbidden in offline tests")
         monkeypatch.setattr(socket.socket, "connect", denied)
         monkeypatch.setattr(socket.socket, "connect_ex", denied)
-
-
-@pytest.fixture(autouse=True)
-def explicit_authorized_context_for_existing_business_ui_tests(request, monkeypatch):
-    """Preserve all business assertions without adding a production bypass.
-
-    New test_totp_* tests do NOT use this fixture's authorization replacement.
-    No real owner binding is read; this injection exists only in test code.
-    """
-    if request.node.path.parent.name == "ui" or request.node.path.name == "test_streamlit_entry.py":
-        from campusops.security import streamlit_gate
-        from tests.fixture_support import PreauthorizedBusinessTestContext
-        monkeypatch.setattr(streamlit_gate, "require_ui_access", lambda: PreauthorizedBusinessTestContext())
-        monkeypatch.setattr(streamlit_gate, "touch_user_activity", lambda: None)
-        monkeypatch.setattr(streamlit_gate, "render_lock_button", lambda: None)
 
 
 @pytest.fixture(autouse=True)

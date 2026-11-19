@@ -805,13 +805,13 @@ def render_app(service: ApplicationPort, *, reset_target: Path | None = None, en
     if access is None:
         return
     service = protect_service(service, access)
-    st.set_page_config(page_title="CampusOps · 无锁评审版", page_icon="🎒", layout="wide", initial_sidebar_state="collapsed")
+    st.set_page_config(page_title="CampusOps", page_icon="🎒", layout="wide", initial_sidebar_state="collapsed")
     st.markdown(APP_STYLES, unsafe_allow_html=True)
     brand, context = st.columns([3, 1], vertical_alignment="center")
-    brand.title("CampusOps · 无锁评审版")
+    brand.title("CampusOps")
     with context:
         render_clear_button()
-    brand.caption("无锁评审版 · 使用独立演示数据")
+    brand.caption("使用独立演示数据")
     if entry_notice:
         st.warning(safe_text(entry_notice))
     if read_only:
@@ -849,7 +849,7 @@ def render_app(service: ApplicationPort, *, reset_target: Path | None = None, en
             st.caption("本进程未声明启用人工智能，默认离线；有影响但模型不可用时明确失败，不会使用替身冒充成功。")
         st.markdown(
             "运行前提：**Windows x64**；先把便携包**完整解压到 D 盘**，再使用包内启动入口。"
-            "桌面入口需要 **Microsoft Edge** 与 **.NET Framework 4**；实际可用性以启动器和环境诊断结果为准。\n\n"
+            "桌面入口使用随包的 Python 运行环境，并通过 **Microsoft Edge** 打开工作台。\n\n"
             "操作顺序：登记故障 → 明确点击生成 → 核对方案 → 人工批准或拒绝。刷新、换页和回看历史只读，不会生成方案。\n\n"
             "真实 AI 需维护者明确启用并配置单一服务、密钥与调用预算；页面不检查或保存密钥。"
             "预算不可用时显示**未知**，不从历史调用次数推算余额；缺配置、失败或无受影响预约都不能当作模型成功。\n\n"

@@ -1,4 +1,4 @@
-"""CampusOps independent reviewer entry (RC15-Review-1)."""
+"""CampusOps demo entry."""
 from pathlib import Path
 import sys
 root = Path(__file__).absolute().parent

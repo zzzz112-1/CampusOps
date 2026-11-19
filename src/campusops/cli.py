@@ -24,7 +24,7 @@ def main():
         service = protect_service(create_application(context.database, seed_asset=context.seed), context)
         if args.command == "reset-demo":
             service.reset_demo_data(args.confirm)
-        print("CampusOps RC15-Review-1; independent fictional data; no TOTP")
+        print("CampusOps 0.2.0rc15.post1; independent fictional data")
         print(f"Equipment={len(service.list_equipment())}; Reservations={len(service.list_reservations())}")
         print(f"Incidents={len(service.list_incidents())}; Runs={len(service.list_runs())}")
         return 0

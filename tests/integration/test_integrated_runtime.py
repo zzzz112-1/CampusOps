@@ -63,15 +63,15 @@ def register(controller):
                                        "Fictional integrated fault", confirmed=True)
 
 
-def test_runtime_no_opt_in_never_reads_provider_or_changes_bookings(database, monkeypatch):
-    monkeypatch.setenv("CAMPUSOPS_LLM_ENABLED", "false")
-    for name in ("MODEL_API_KEY", "MODEL_BASE_URL", "MODEL_ID"):
+def test_runtime_no_opt_in_never_reads_provider_or_changes_bookings(configured_context, monkeypatch):
+    monkeypatch.setenv("CAMPUSOPS_REVIEW_LLM_ENABLED", "false")
+    for name in ("CAMPUSOPS_REVIEW_MODEL_API_KEY", "CAMPUSOPS_REVIEW_MODEL_BASE_URL", "CAMPUSOPS_REVIEW_MODEL_ID"):
         monkeypatch.delenv(name, raising=False)
 
-    def denied():
-        raise AssertionError("Disabled runtime must not read or construct a model adapter")
-    monkeypatch.setattr(LLMAdapter, "from_env", denied)
-    service = create_configured_application(database.path)
+    def denied(*args, **kwargs):
+        raise AssertionError("Disabled runtime must not construct a model adapter")
+    monkeypatch.setattr(LLMAdapter, "__init__", denied)
+    service = create_configured_application(configured_context.database)
     before = service.list_reservations()
     incident = register(UiController(service, {}))
     result = service.start_workflow(incident.id)
@@ -80,46 +80,47 @@ def test_runtime_no_opt_in_never_reads_provider_or_changes_bookings(database, mo
     assert service.list_reservations() == before
 
 
-def test_runtime_no_impact_succeeds_without_a_model(database, monkeypatch):
-    monkeypatch.setenv("CAMPUSOPS_LLM_ENABLED", "false")
-    service = create_configured_application(database.path)
+def test_runtime_no_impact_succeeds_without_a_model(configured_context, monkeypatch):
+    monkeypatch.setenv("CAMPUSOPS_REVIEW_LLM_ENABLED", "false")
+    service = create_configured_application(configured_context.database)
     incident = service.register_equipment_failure(IncidentCreate(
         equipment_id="cam-01", effective_at="2026-11-12T00:00:00Z", reason="Fictional later fault"))
     result = service.start_workflow(incident.id)
     assert result.status == "NO_IMPACT" and service.get_run(result.run_id).model_calls == 0
 
 
-def test_runtime_opt_in_without_configuration_fails_closed(database, monkeypatch):
-    monkeypatch.setenv("CAMPUSOPS_LLM_ENABLED", "true")
-    for name in ("MODEL_API_KEY", "MODEL_BASE_URL", "MODEL_ID"):
+def test_runtime_opt_in_without_configuration_fails_closed(configured_context, monkeypatch):
+    monkeypatch.setenv("CAMPUSOPS_REVIEW_LLM_ENABLED", "true")
+    for name in ("CAMPUSOPS_REVIEW_MODEL_API_KEY", "CAMPUSOPS_REVIEW_MODEL_BASE_URL", "CAMPUSOPS_REVIEW_MODEL_ID"):
         monkeypatch.delenv(name, raising=False)
     with pytest.raises(CoreFailure) as caught:
-        create_configured_application(database.path)
+        create_configured_application(configured_context.database)
     assert caught.value.error.code == ErrorCode.PROVIDER_UNAVAILABLE
 
 
-def test_runtime_configured_binding_is_lazy_and_uses_single_adapter(database, monkeypatch):
+def test_runtime_configured_binding_is_lazy_and_uses_single_adapter(configured_context, monkeypatch):
     from campusops import bootstrap
 
     for name, value in {
-        "CAMPUSOPS_LLM_ENABLED": "true", "MODEL_API_KEY": "fictional-integration-test-key",
-        "MODEL_BASE_URL": "https://fictional-provider.example/v1", "MODEL_ID": "fictional-model",
+        "CAMPUSOPS_REVIEW_LLM_ENABLED": "true",
+        "CAMPUSOPS_REVIEW_MODEL_API_KEY": "fictional-integration-test-key",
+        "CAMPUSOPS_REVIEW_MODEL_BASE_URL": "https://fictional-provider.example/v1",
+        "CAMPUSOPS_REVIEW_MODEL_ID": "fictional-model",
     }.items():
         monkeypatch.setenv(name, value)
-    ledger = ROOT / "var/model-budget/usage.jsonl"
-    previous_ledger = ledger.read_bytes() if ledger.exists() else None
+    ledger = configured_context.budget / "usage.jsonl"
     captured = {}
     def record(*args, **kwargs):
         captured.update(kwargs)
         return "composition-only-test-sentinel"
     monkeypatch.setattr(bootstrap, "create_application", record)
-    assert create_configured_application(database.path) == "composition-only-test-sentinel"
+    assert create_configured_application(configured_context.database) == "composition-only-test-sentinel"
     assert isinstance(captured["orchestration"], GearShiftOrchestrator)
     assert isinstance(captured["model_client"], LLMAdapter)
     assert captured["execution_mode"] == ExecutionMode.REAL_API
     assert captured["model_id"] == "fictional-model"
     # No complete() call, budget reservation or provider request happened.
-    assert (ledger.read_bytes() if ledger.exists() else None) == previous_ledger
+    assert not ledger.exists()
 
 
 def test_ui_core_main_approval_and_restart_readback(database):
@@ -239,13 +240,14 @@ def test_provider_failure_keeps_bookings_and_logs_actual_attempt_count(database)
     assert service.list_reservations() == original
 
 
-def test_status_reports_installed_sources_without_loading_model_config(database, monkeypatch, capsys):
+def test_status_reports_seed_without_loading_model_config(review_context, monkeypatch, capsys):
     from campusops.cli import main
-    # This test covers the status business output; CLI gating has dedicated tests.
-    monkeypatch.setattr("campusops.security.terminal.authorize_terminal", lambda: None)
-    monkeypatch.setenv("CAMPUSOPS_LLM_ENABLED", "true")
-    monkeypatch.setattr("sys.argv", ["campusops", "status", "--db", str(database.path)])
+
+    monkeypatch.setattr("campusops.cli.get_context", lambda: review_context)
+    monkeypatch.setenv("CAMPUSOPS_REVIEW_LLM_ENABLED", "true")
+    monkeypatch.setattr("sys.argv", ["campusops", "status", "--db", str(review_context.database)])
     assert main() == 0
     output = capsys.readouterr().out
-    assert "Agent Core source: present" in output and "UI source: present" in output
-    assert "NOT_IMPLEMENTED" not in output
+    assert "Equipment=10; Reservations=20" in output
+    assert "Incidents=0; Runs=0" in output
+    assert not (review_context.budget / "usage.jsonl").exists()
