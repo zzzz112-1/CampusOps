@@ -1,5 +1,5 @@
 """Reservation UI intents and readback, using only Main's optional public port."""
-from uuid import uuid4
+from uuid import NAMESPACE_URL, uuid5
 
 from campusops.contracts.errors import CampusOpsError
 from campusops.contracts.models import ErrorCode
@@ -67,10 +67,11 @@ class BookingController(UiController):
         intent = ("booking_change_decision", run.id, generation)
         self._begin(intent)
         if reject_reason is None:
+           identity = (run.id, actor)
             keys = dict(self.state.get("campusops_booking_decision_keys", {}))
-            keys.setdefault(run.id, "booking_approve_" + uuid4().hex)
+            keys.setdefault(identity, "booking_approve_" + uuid5(NAMESPACE_URL, repr(("campusops-booking-v1", *identity))).hex)
             self.state["campusops_booking_decision_keys"] = keys
-            result = self.service.approve_reservation_change(run.id, actor, keys[run.id])
+            result = self.service.approve_reservation_change(run.id, actor, keys[identity])
         else:
             if not reject_reason.strip():
                 raise UiInputError("请填写拒绝原因。")
