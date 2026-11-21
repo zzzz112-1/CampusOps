@@ -174,7 +174,8 @@ class ApprovalService:
             logging.getLogger(__name__).error("Approval failed and audit DB unavailable: code=%s", result.error.code)
 
     def _approve(self, proposal_id: str, actor_alias: str, idempotency_key: str) -> ApplyResult:
-        if not actor_alias.strip() or len(actor_alias) > 100 or not idempotency_key.strip() or len(idempotency_key) > 128:
+       actor_alias = actor_alias.strip() if isinstance(actor_alias, str) else ""
+        if not actor_alias or len(actor_alias) > 100 or not isinstance(idempotency_key, str) or not idempotency_key.strip() or len(idempotency_key) > 128:
             return failure(proposal_id, ErrorCode.INVALID_INPUT, "Actor and a stable idempotency key are required")
         try:
             with self._database.transaction() as connection:
@@ -233,6 +234,7 @@ class ApprovalService:
                 connection.execute("UPDATE proposals SET status='APPLIED' WHERE id=?", (proposal_id,))
                 connection.execute("UPDATE workflow_runs SET status='APPLIED',finished_at_utc=? WHERE id=?",
                                    (repo.timestamp(), proposal.run_id))
+                events.invalidate_pending(connection)
                 repo.audit(connection, "PROPOSAL_APPLIED", "proposal", proposal_id,
                            {item.reservation_id: before[item.reservation_id].model_dump(mode="json") for item in proposal.changes},
                            {item.reservation_id: after[item.reservation_id].model_dump(mode="json") for item in proposal.changes},
