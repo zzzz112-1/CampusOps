@@ -118,6 +118,8 @@ class ApplicationService:
             ))
             connection.execute("UPDATE equipment SET status='FAULTED',version=version+1,updated_at_utc=? WHERE id=?",
                                (repo.timestamp(), created.equipment_id))
+            from campusops.storage.reservation_events import invalidate_pending
+            invalidate_pending(connection)
             repo.audit(connection, "EQUIPMENT_FAILURE_REGISTERED", "incident", created.id,
                        {"equipment": equipment.model_dump(mode="json")}, created.model_dump(mode="json"),
                        actor_type="administrator")
