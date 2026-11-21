@@ -104,7 +104,10 @@ def plan_change(application, request):
                     return active
                 raise CampusOpsError(ErrorCode.INVALID_STATE, "此预约已有处理中或待审批的修改，请先查看并处理原请求。")
         context = ReservationChangeContext(id=change_id, before=before, request=request, snapshot_fingerprint=snapshot.fingerprint)
-        if requested_booking(context, request.requested_equipment_id or before.equipment_id) == before and request.requested_equipment_id is not None:
+        unchanged = requested_booking(context, request.requested_equipment_id or before.equipment_id) == before
+        original_eq = next((row for row in snapshot.equipment if row.id == before.equipment_id), None)
+        original_healthy = (original_eq is not None and original_eq.status == "AVAILABLE" and not any(inc.status == "OPEN" and inc.equipment_id == before.equipment_id and before.ends_at > inc.effective_at for inc in snapshot.incidents))
+        if unchanged and (request.requested_equipment_id is not None or original_healthy):
             raise CampusOpsError(ErrorCode.INVALID_INPUT, "尚未修改任何预约内容，无需生成方案。")
         agents = repo.list_agent_configs(connection)
         candidate_validation=change_candidate_diagnostics(snapshot,context)
