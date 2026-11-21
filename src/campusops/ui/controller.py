@@ -292,11 +292,14 @@ class UiController:
         if not isinstance(self.service, EquipmentMaintenancePort):
             raise UiInputError("当前服务尚未提供维修恢复功能，请联系维护者。")
         actor = self._actor(actor_alias)
-        request = EquipmentRecoveryCreate(
-            equipment_id=equipment_id, expected_equipment_version=expected_version,
-            actor_alias=actor, note=note.strip(),
-            idempotency_key="ui_recovery_" + uuid5(NAMESPACE_URL, repr((equipment_id, expected_version, actor, note.strip()))).hex,
-        )
+        try:
+            request = EquipmentRecoveryCreate(
+                equipment_id=equipment_id, expected_equipment_version=expected_version,
+                actor_alias=actor, note=note.strip(),
+                idempotency_key="ui_recovery_" + uuid5(NAMESPACE_URL, repr((equipment_id, expected_version, actor, note.strip()))).hex,
+            )
+        except ValidationError:
+            raise UiInputError("请填写 1–500 字的维修说明，并确认器材状态与操作人别名。") from None
         intent = ("recovery", equipment_id, expected_version)
         self._begin(intent)
         before = self.service.list_reservations()
